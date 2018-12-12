@@ -1,8 +1,8 @@
-use util::{Point, Bound};
-use game::Game;
-use rendering::RenderingComponent;
-use map::MapComponent;
-use movement::{AggroMovementComponent, RandomMovementComponent, TcodUserMovementComponent, MovementComponent};
+use crate::util::{Point, Bound};
+use crate::game::Game;
+use crate::rendering::RenderingComponent;
+use crate::map::MapComponent;
+use crate::movement::{AggroMovementComponent, RandomMovementComponent, TcodUserMovementComponent, MovementComponent};
 
 pub struct Actor {
     pub position: Point,

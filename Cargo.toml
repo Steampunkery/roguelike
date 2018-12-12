@@ -3,6 +3,7 @@
 name = "roguelike"
 version = "0.0.1"
 authors = ["jmcfarland"]
+edition = "2018"
 
 [dependencies]
 tcod = "*"

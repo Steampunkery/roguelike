@@ -1,17 +1,14 @@
-extern crate tcod;
-extern crate rand;
+use tcod::input::KeyCode;
+use crate::game::Game;
+use crate::util::{Bound, Point};
+use crate::map::MapComponent;
 
-use self::tcod::input::KeyCode;
-use game::Game;
-use util::{Bound, Point};
-use map::MapComponent;
+use crate::util::Contains::*;
+use crate::util::PointEquality::*;
+use crate::util::XPointRelation::*;
+use crate::util::YPointRelation::*;
 
-use util::Contains::*;
-use util::PointEquality::*;
-use util::XPointRelation::*;
-use util::YPointRelation::*;
-
-use self::rand::Rng;
+use rand::Rng;
 
 pub trait MovementComponent {
     fn update(&self, point: Point, map_component: &Box<MapComponent>) -> Point;
@@ -70,8 +67,8 @@ impl TcodUserMovementComponent {
 }
 
 impl MovementComponent for TcodUserMovementComponent {
-    fn update(&self, point: Point, map_component: &Box<MapComponent>) -> Point {
-        let mut offset = Point { x: point.x, y: point.y };
+    fn update(&self, position: Point, map_component: &Box<MapComponent>) -> Point {
+        let mut offset = Point { x: position.x, y: position.y };
         offset = match Game::get_last_keypress() {
             Some(keypress) => {
                 match keypress.code {
@@ -94,8 +91,11 @@ impl MovementComponent for TcodUserMovementComponent {
         };
 
         match map_component.get_map()[offset.x as usize][offset.y as usize].blocked {
-            false => offset,
-            true => point
+            false => {
+                Game::set_last_character_point(position);
+                offset
+            },
+            true => position
         }
     }
 }

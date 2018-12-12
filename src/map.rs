@@ -1,14 +1,12 @@
-extern crate tcod;
-extern crate rand;
+use crate::util::Point;
+use crate::actor::Actor;
+use crate::rendering::RenderingComponent;
 
-use self::tcod::Color;
-use util::Point;
-use actor::Actor;
-use self::rand::Rng;
-use rendering::RenderingComponent;
+use rand::Rng;
+use tcod::Color;
 
-use game::MAP_WIDTH;
-use game::MAP_HEIGHT;
+use crate::game::MAP_WIDTH;
+use crate::game::MAP_HEIGHT;
 
 const ROOM_MAX_SIZE: i32 = 10;
 const ROOM_MIN_SIZE: i32 = 6;
@@ -66,6 +64,7 @@ pub trait MapComponent {
     fn get_rooms(&self) -> &Vec<Rect>;
     fn get_map(&self) -> &Map;
     fn get_map_mut(&mut self) -> &mut Map;
+    fn get_player_start(&self) -> Point;
     fn contains(&self, x: i32, y: i32) -> bool;
     fn render(&self, rendering_component: &mut Box<RenderingComponent>);
     fn is_blocked(&self, x: i32, y: i32) -> bool;
@@ -89,6 +88,10 @@ impl MapComponent for DungeonMapComponent {
 
     fn get_map_mut(&mut self) -> &mut Map {
         &mut self.map
+    }
+
+    fn get_player_start(&self) -> Point {
+        self.player_start
     }
 
     fn contains(&self, x: i32, y: i32) -> bool {

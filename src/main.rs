@@ -1,7 +1,4 @@
 #![feature(box_syntax)]
-extern crate tcod;
-extern crate roguelike;
-
 use roguelike::game::Game;
 use roguelike::actor::Actor;
 
