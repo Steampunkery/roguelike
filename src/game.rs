@@ -8,7 +8,7 @@ use map::{DungeonMapComponent, MapComponent};
 use self::tcod::input::Key;
 
 static mut LAST_KEYPRESS: Option<Key> = None;
-static mut CHAR_LOCATION: Point = Point { x: 40, y: 25 };
+static mut CHAR_LOCATION: Point = Point { x: 0, y: 0 };
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 50;
@@ -28,6 +28,8 @@ impl Game {
         };
         let rc: Box<TcodRenderingComponent> = box TcodRenderingComponent::new(bounds);
         let mc: Box<DungeonMapComponent> = box DungeonMapComponent::new();
+
+        unsafe { CHAR_LOCATION = mc.player_start };
         Game {
             exit: false,
             window_bounds: bounds,
@@ -63,10 +65,10 @@ impl Game {
     }
 
     pub fn update(&mut self, npcs: &mut Vec<Actor>, c: &mut Actor) {
-        c.update();
+        c.update(&self.map_component);
         Game::set_character_point(c.position);
         for i in npcs.iter_mut() {
-            i.update();
+            i.update(&self.map_component);
         }
     }
 

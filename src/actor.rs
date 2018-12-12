@@ -1,6 +1,7 @@
 use util::{Point, Bound};
 use game::Game;
 use rendering::RenderingComponent;
+use map::MapComponent;
 use movement::{AggroMovementComponent, RandomMovementComponent, TcodUserMovementComponent, MovementComponent};
 
 pub struct Actor {
@@ -35,8 +36,8 @@ impl Actor {
         Actor::new(x, y, 'k', mc)
     }
 
-    pub fn update(&mut self) {
-        self.position = self.movement_component.update(self.position);
+    pub fn update(&mut self, map_component: &Box<MapComponent>) {
+        self.position = self.movement_component.update(self.position, map_component);
     }
 
     pub fn render(&self, rendering_component: &mut Box<RenderingComponent>) {

@@ -4,6 +4,7 @@ extern crate rand;
 use self::tcod::input::KeyCode;
 use game::Game;
 use util::{Bound, Point};
+use map::MapComponent;
 
 use util::Contains::*;
 use util::PointEquality::*;
@@ -13,7 +14,7 @@ use util::YPointRelation::*;
 use self::rand::Rng;
 
 pub trait MovementComponent {
-    fn update(&self, point: Point) -> Point;
+    fn update(&self, point: Point, map_component: &Box<MapComponent>) -> Point;
 }
 
 pub struct RandomMovementComponent {
@@ -35,7 +36,7 @@ impl AggroMovementComponent {
 }
 
 impl MovementComponent for AggroMovementComponent {
-    fn update(&self, point: Point) -> Point {
+    fn update(&self, point: Point, map_component: &Box<MapComponent>) -> Point {
         let char_point = Game::get_character_point();
         let mut offset = Point { x: 0, y: 0 };
         match point.compare_x(char_point) {
@@ -69,7 +70,7 @@ impl TcodUserMovementComponent {
 }
 
 impl MovementComponent for TcodUserMovementComponent {
-    fn update(&self, point: Point) -> Point {
+    fn update(&self, point: Point, map_component: &Box<MapComponent>) -> Point {
         let mut offset = Point { x: point.x, y: point.y };
         offset = match Game::get_last_keypress() {
             Some(keypress) => {
@@ -92,9 +93,9 @@ impl MovementComponent for TcodUserMovementComponent {
             None => { offset }
         };
 
-        match self.window_bounds.contains(offset) {
-            DoesContain => { offset }
-            DoesNotContain => { point }
+        match map_component.get_map()[offset.x as usize][offset.y as usize].blocked {
+            false => offset,
+            true => point
         }
     }
 }
@@ -106,8 +107,7 @@ impl RandomMovementComponent {
 }
 
 impl MovementComponent for RandomMovementComponent {
-
-    fn update(&self, point: Point) -> Point {
+    fn update(&self, point: Point, map_component: &Box<MapComponent>) -> Point {
         let mut offset = Point { x: point.x, y: point.y };
         let offset_x = rand::thread_rng().gen_range(0, 3i32) - 1;
         match self.window_bounds.contains(offset.offset_x(offset_x)) {
