@@ -1,0 +1,9 @@
+target/
+
+*.dylib
+*.rlib
+
+terminal.png
+
+roguelike.iml
+.idea/
