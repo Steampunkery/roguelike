@@ -90,7 +90,7 @@ impl MovementComponent for TcodUserMovementComponent {
             None => { offset }
         };
 
-        match map_component.get_map()[offset.x as usize][offset.y as usize].blocked {
+        match map_component.is_blocked(offset.x, offset.y) {
             false => {
                 Game::set_last_character_point(position);
                 offset

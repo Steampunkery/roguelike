@@ -1,5 +1,4 @@
 use crate::util::Point;
-use crate::actor::Actor;
 use crate::rendering::RenderingComponent;
 
 use rand::Rng;
@@ -72,7 +71,6 @@ pub trait MapComponent {
 
 pub struct DungeonMapComponent {
     pub rooms: Vec<Rect>,
-    pub mobs: Vec<Actor>,
     pub map: Map,
     pub player_start: Point
 }
@@ -107,10 +105,7 @@ impl MapComponent for DungeonMapComponent {
         if self.map[x as usize][y as usize].blocked {
             return true;
         }
-
-        self.mobs.iter().any(|mob| {
-            (mob.position.x, mob.position.y) == (x, y)
-        })
+        return false;
     }
 }
 
@@ -119,7 +114,6 @@ impl DungeonMapComponent {
         // fill map with "unblocked" tiles
         let mut map = vec![vec![Tile::wall(); (MAP_HEIGHT + 1) as usize]; (MAP_WIDTH + 1) as usize];
         let mut rooms = vec![];
-        let mut mobs = Vec::<Actor>::new();
         let mut player_start = Point { x: 0, y: 0 };
 
         for _ in 0..MAX_ROOMS {
@@ -165,7 +159,6 @@ impl DungeonMapComponent {
 
         DungeonMapComponent {
             rooms,
-            mobs,
             map,
             player_start
         }
