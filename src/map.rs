@@ -66,7 +66,7 @@ pub trait MapComponent {
     fn get_map_mut(&mut self) -> &mut Map;
     fn get_player_start(&self) -> Point;
     fn contains(&self, x: i32, y: i32) -> bool;
-    fn render(&self, rendering_component: &mut Box<RenderingComponent>);
+    fn render(&mut self, rendering_component: &mut Box<RenderingComponent>);
     fn is_blocked(&self, x: i32, y: i32) -> bool;
 }
 
@@ -99,21 +99,8 @@ impl MapComponent for DungeonMapComponent {
         && (y < MAP_HEIGHT && y >= 0)
     }
 
-    fn render(&self, rendering_component: &mut Box<RenderingComponent>) {
-        for x in 0..self.map.len() - 1 {
-            for y in 0..self.map[x].len() - 1 {
-                let coordinates = Point { x: x as i32, y: y as i32 };
-                let wall = self.map[x][y].block_sight;
-
-                if !wall {
-                    rendering_component.render_object(coordinates, '.');
-                } else {
-                    if self.adjacent_to_floor(&coordinates) {
-                        rendering_component.render_object(coordinates, '+');
-                    }
-                }
-            }
-        }
+    fn render(&mut self, rendering_component: &mut Box<RenderingComponent>) {
+        rendering_component.render_map(&mut self.map);
     }
 
     fn is_blocked(&self, x: i32, y: i32) -> bool {
@@ -130,7 +117,7 @@ impl MapComponent for DungeonMapComponent {
 impl DungeonMapComponent {
     pub fn new() -> DungeonMapComponent {
         // fill map with "unblocked" tiles
-        let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
+        let mut map = vec![vec![Tile::wall(); (MAP_HEIGHT + 1) as usize]; (MAP_WIDTH + 1) as usize];
         let mut rooms = vec![];
         let mut mobs = Vec::<Actor>::new();
         let mut player_start = Point { x: 0, y: 0 };
@@ -182,15 +169,6 @@ impl DungeonMapComponent {
             map,
             player_start
         }
-    }
-
-    fn adjacent_to_floor(&self, point: &Point) -> bool {
-        let (x, y) = (point.x as usize, point.y as usize);
-
-        self.contains( (x + 1) as i32, y as i32) && !self.map[x + 1][y].block_sight
-        || self.contains( x as i32 - 1, y as i32) && !self.map[x - 1][y].block_sight
-        || self.contains( x as i32, (y + 1) as i32) && !self.map[x][y + 1].block_sight
-        || self.contains( x as i32, y as i32 - 1) && !self.map[x][y - 1].block_sight
     }
 
     fn create_room(room: Rect, map: &mut Map) {

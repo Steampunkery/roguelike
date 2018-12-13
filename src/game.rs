@@ -9,8 +9,9 @@ static mut LAST_KEYPRESS: Option<Key> = None;
 static mut LAST_CHAR_POSITION: Point = Point { x: -1, y: -1 };
 static mut CHAR_LOCATION: Point = Point { x: 0, y: 0 };
 
-pub const MAP_WIDTH: i32 = 80;
-pub const MAP_HEIGHT: i32 = 50;
+// Make these constants two more than you want them to actually be
+pub const MAP_WIDTH: i32 = 82;
+pub const MAP_HEIGHT: i32 = 52;
 
 pub struct Game {
     pub exit: bool,
@@ -37,8 +38,6 @@ impl Game {
             map_component: mc
         }
     }
-
-
 
     pub fn get_last_keypress() -> Option<Key> {
         unsafe { LAST_KEYPRESS }
