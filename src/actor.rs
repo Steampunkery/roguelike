@@ -19,8 +19,6 @@ impl Actor {
     pub fn update(&mut self, map_component: &mut Box<MapComponent>) {
         if let Some(position) = self.movement_component.update(self.position, map_component) {
             self.position = position;
-        } else {
-            return;
         }
     }
 
