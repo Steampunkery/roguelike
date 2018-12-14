@@ -1,3 +1,7 @@
+use crate::map::MapComponent;
+
+use pathfinding::prelude::absdiff;
+
 pub enum XPointRelation {
     LeftOfPoint,
     RightOfPoint,
@@ -15,7 +19,7 @@ pub enum PointEquality {
     PointsNotEqual
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Point {
     pub x: i32,
     pub y: i32
@@ -66,6 +70,25 @@ impl Point {
         } else {
             PointsNotEqual
         }
+    }
+
+    pub fn distance(&self, other: &Point) -> u32 {
+        (absdiff(self.x, other.x) + absdiff(self.y, other.y)) as u32
+    }
+
+    pub fn successors(&self, map: &Box<MapComponent>) -> Vec<(Point, u32)> {
+        let (x, y) = (self.x, self.y);
+        let mut successors = vec![];
+        for i in &[-1, 1] {
+            if !map.is_blocked(x, y + i) {
+                successors.push((Point { x, y: y + i }, 1));
+            }
+
+            if !map.is_blocked(x + i, y) {
+                successors.push((Point { x: x + i, y }, 1));
+            }
+        }
+        successors
     }
 }
 

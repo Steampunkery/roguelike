@@ -68,11 +68,17 @@ impl RenderingComponent for TcodRenderingComponent {
         for x in 0..map.len() - 1 {
             for y in 0..map[x].len() - 1 {
                 let wall = map[x][y].block_sight;
+                let color_override = map[x][y].color_override;
 
                 if !wall {
                     self.render_tile(x as i32, y as i32, '.', &mut map[x][y].explored);
                 } else {
                     self.render_tile(x as i32, y as i32, '+', &mut map[x][y].explored);
+                }
+
+                if let Some(color) = color_override {
+                    self.root_console.set_char_background(x as i32, y as i32, color, BackgroundFlag::Set);
+                    map[x][y].color_override = None;
                 }
             }
         }

@@ -74,10 +74,10 @@ impl Game {
     }
 
     pub fn update(&mut self, npcs: &mut Vec<Actor>, c: &mut Actor) {
-        c.update(&self.map_component);
+        c.update(&mut self.map_component);
         Game::set_character_point(c.position);
         for i in npcs.iter_mut() {
-            i.update(&self.map_component);
+            i.update(&mut self.map_component);
         }
     }
 
