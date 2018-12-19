@@ -7,32 +7,42 @@ use tcod::Color;
 use crate::game::MAP_WIDTH;
 use crate::game::MAP_HEIGHT;
 
+/// Maximum height and width of a room.
 const ROOM_MAX_SIZE: i32 = 10;
+/// Minimum height and width of a room.
 const ROOM_MIN_SIZE: i32 = 6;
+/// Maximum number of rooms in a level.
 const MAX_ROOMS: i32 = 30;
 
-const MAX_ROOM_MONSTERS: i32 = 3;
-
+/// Type alias for a `Vec` of `Vec` of `Tile`s.
 pub type Map = Vec<Vec<Tile>>;
 
+/// Struct representing one coordinate on the map.
 #[derive(Clone, Copy, Debug)]
 pub struct Tile {
+    /// Whether the tile blocks walking paths.
     pub blocked: bool,
+    /// Whether the tile blocks the sight of `Actor`s.
     pub block_sight: bool,
+    /// Whether the tile has been explored by the player.
     pub explored: bool,
+    /// Debug field for displaying AI paths.
     pub color_override: Option<Color>
 }
 
 impl Tile {
+    /// Creates a new floor tile.
     pub fn empty() -> Self {
         Tile { blocked: false, block_sight: false, explored: false, color_override: None }
     }
 
+    /// Creates a new wall tile.
     pub fn wall() -> Self {
         Tile { blocked: true, block_sight: true, explored: false, color_override: None }
     }
 }
 
+/// Simple struct representing a rectangle.
 #[derive(Clone, Copy, Debug)]
 pub struct Rect {
     pub x1: i32,
@@ -42,36 +52,60 @@ pub struct Rect {
 }
 
 impl Rect {
+    /// Convenience method for creating new rectangles.
     pub fn new(x: i32, y: i32, w: i32, h: i32) -> Self {
         Rect { x1: x, y1: y, x2: x + w, y2: y + h }
     }
 
+    /// Returns the center of the rectangle.
     pub fn center(&self) -> (i32, i32) {
         let center_x = (self.x1 + self.x2) / 2;
         let center_y = (self.y1 + self.y2) / 2;
         (center_x, center_y)
     }
 
+    /// Checks if the rectangle collides with another.
     pub fn intersects_with(&self, other: &Rect) -> bool {
         // returns true if this rectangle intersects with another one
         (self.x1 <= other.x2) && (self.x2 >= other.x1) &&
             (self.y1 <= other.y2) && (self.y2 >= other.y1)
     }
+
+    pub fn rand_point(&self) -> Point {
+        Point {
+            x: rand::thread_rng().gen_range(self.x1 + 1, self.x2),
+            y: rand::thread_rng().gen_range(self.y1 + 1, self.y2),
+        }
+    }
 }
 
+/// This trait holds the requisite methods for a generic map generator
+/// so that different level types can easily be generated.
 pub trait MapComponent {
+    /// Get the position of all rooms in the level.
     fn get_rooms(&self) -> &Vec<Rect>;
+    /// Get the underlying `Map` object
     fn get_map(&self) -> &Map;
+    /// Mutably borrow the underlying `Map` object.
     fn get_map_mut(&mut self) -> &mut Map;
+    /// Gets where the level generator thinks the player should spawn.
+    /// This should be a safe place for the player initially.
     fn get_player_start(&self) -> Point;
+    /// Whether the current map display area contains a point.
     fn contains(&self, x: i32, y: i32) -> bool;
+    /// Render the underlying map object.
     fn render(&mut self, rendering_component: &mut Box<RenderingComponent>);
+    /// Whether the supplied position has the `blocked` flag set.
     fn is_blocked(&self, x: i32, y: i32) -> bool;
 }
 
+/// Basic struct for simple dungeon levels.
 pub struct DungeonMapComponent {
+    /// The coordinates for the rooms in the dungeon.
     pub rooms: Vec<Rect>,
+    /// The map object representing the level.
     pub map: Map,
+    /// Where this particular map generator thinks the player should start.
     pub player_start: Point
 }
 
@@ -110,6 +144,7 @@ impl MapComponent for DungeonMapComponent {
 }
 
 impl DungeonMapComponent {
+    /// Creates a new dungeon map with the default Rust random implementation
     pub fn new() -> DungeonMapComponent {
         // fill map with "unblocked" tiles
         let mut map = vec![vec![Tile::wall(); (MAP_HEIGHT + 1) as usize]; (MAP_WIDTH + 1) as usize];

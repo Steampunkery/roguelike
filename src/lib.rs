@@ -6,3 +6,4 @@ pub mod movement;
 pub mod actor;
 pub mod map;
 pub mod ai;
+pub mod level;

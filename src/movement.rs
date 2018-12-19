@@ -4,8 +4,8 @@ use crate::map::MapComponent;
 use crate::ai::DEBUG_AI;
 use crate::ai::find_astar_path;
 
-use crate::util::{Bound, Point};
 use crate::util::Contains::*;
+use crate::util::{Bound, Point};
 
 use rand::Rng;
 use tcod::colors::Color;
@@ -30,7 +30,7 @@ impl AggroMovementComponent {
         AggroMovementComponent { path: vec![] }
     }
 
-    pub fn show_ai(&mut self, map: &mut Box<MapComponent>) {
+    fn show_ai(&mut self, map: &mut Box<MapComponent>) {
         if DEBUG_AI {
             if !self.path.is_empty() {
                 for point in &self.path {
@@ -109,6 +109,7 @@ impl MovementComponent for TcodUserMovementComponent {
                 true => return None
             }
         }
+
         None
     }
 }

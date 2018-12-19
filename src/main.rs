@@ -8,18 +8,20 @@ use tcod::input::KeyCode;
 fn main() {
     let mut game = Game::new();
     let mut c = Actor::player(game.window_bounds);
-    let mut npcs: Vec<Actor> = vec![];
 
     for _ in 0..3 {
-        let room_num = rand::thread_rng().gen_range(0, game.map_component.get_rooms().len());
-        let room = game.map_component.get_rooms().get(room_num).unwrap();
+        // Get a random room
+        let room_num = rand::thread_rng().gen_range(0, game.level.map_component.get_rooms().len());
+        let room = game.level.map_component.get_rooms()[room_num];
 
-        let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
-        let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
-        npcs.push(Actor::kobold(x, y));
+        // Pick random coordinates in that room
+        let rand_point = room.rand_point();
+
+        // Spawn a monster there
+        game.level.mobs.push(Actor::kobold(rand_point.x, rand_point.y));
     }
 
-    game.render(&npcs, &c);
+    game.render(&c);
     while !(game.rendering_component.get_root_console().window_closed() || game.exit) {
         // wait for user input
         let keypress = game.wait_for_keypress();
@@ -29,9 +31,9 @@ fn main() {
             KeyCode::Escape => game.exit = true,
             _ => {}
         }
-        game.update(&mut npcs, &mut c);
+        game.update(&mut c);
 
         // render
-        game.render(&npcs, &c);
+        game.render(&c);
     }
 }
