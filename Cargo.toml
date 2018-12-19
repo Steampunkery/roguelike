@@ -1,7 +1,7 @@
 [package]
 
 name = "roguelike"
-version = "0.0.1"
+version = "0.0.5"
 authors = ["jmcfarland"]
 edition = "2018"
 
@@ -9,3 +9,4 @@ edition = "2018"
 tcod = "*"
 rand = "*"
 pathfinding = "*"
+hashbrown = "*"

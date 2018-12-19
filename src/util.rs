@@ -76,7 +76,7 @@ impl Point {
         (absdiff(self.x, other.x) + absdiff(self.y, other.y)) as u32
     }
 
-    pub fn successors(&self, map: &Box<MapComponent>) -> Vec<(Point, u32)> {
+    pub fn successors(&self, map: &Box<dyn MapComponent>) -> Vec<(Point, u32)> {
         let (x, y) = (self.x, self.y);
         let mut successors = vec![];
         for i in &[-1, 1] {

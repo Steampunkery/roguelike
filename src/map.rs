@@ -94,7 +94,7 @@ pub trait MapComponent {
     /// Whether the current map display area contains a point.
     fn contains(&self, x: i32, y: i32) -> bool;
     /// Render the underlying map object.
-    fn render(&mut self, rendering_component: &mut Box<RenderingComponent>);
+    fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>);
     /// Whether the supplied position has the `blocked` flag set.
     fn is_blocked(&self, x: i32, y: i32) -> bool;
 }
@@ -131,7 +131,7 @@ impl MapComponent for DungeonMapComponent {
         && (y < MAP_HEIGHT && y >= 0)
     }
 
-    fn render(&mut self, rendering_component: &mut Box<RenderingComponent>) {
+    fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
         rendering_component.render_map(&mut self.map);
     }
 

@@ -11,13 +11,13 @@ pub struct Level {
     /// A vector of all the items on the level
     pub items: Vec<Item>,
     /// The actual `MapComponent` that hold the meat of the level data
-    pub map_component: Box<MapComponent + 'static>,
+    pub map_component: Box<dyn MapComponent + 'static>,
 }
 
 impl Level {
     /// Creates a basic level with a default dungeon map and some random items
     pub fn new() -> Level {
-        let mc: Box<MapComponent> = box DungeonMapComponent::new();
+        let mc: Box<dyn MapComponent> = box DungeonMapComponent::new();
         let items = place_items(mc.get_rooms());
 
         Level {
@@ -27,7 +27,7 @@ impl Level {
         }
     }
 
-    pub fn render(&mut self, rendering_component: &mut Box<RenderingComponent>) {
+    pub fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
         self.map_component.render(rendering_component);
         for item in &self.items {
             item.render(rendering_component);
@@ -52,7 +52,7 @@ impl Item {
         }
     }
 
-    pub fn render(&self, rendering_component: &mut Box<RenderingComponent>) {
+    pub fn render(&self, rendering_component: &mut Box<dyn RenderingComponent>) {
         rendering_component.render_object(self.position, self.display_char);
     }
 }

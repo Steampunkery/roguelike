@@ -12,7 +12,7 @@ use tcod::colors::Color;
 use tcod::input::KeyCode;
 
 pub trait MovementComponent {
-    fn update(&mut self, position: Point, map_component: &mut Box<MapComponent>) -> Option<Point>;
+    fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point>;
 }
 
 pub struct RandomMovementComponent {
@@ -30,7 +30,7 @@ impl AggroMovementComponent {
         AggroMovementComponent { path: vec![] }
     }
 
-    fn show_ai(&mut self, map: &mut Box<MapComponent>) {
+    fn show_ai(&mut self, map: &mut Box<dyn MapComponent>) {
         if DEBUG_AI {
             if !self.path.is_empty() {
                 for point in &self.path {
@@ -42,7 +42,7 @@ impl AggroMovementComponent {
 }
 
 impl MovementComponent for AggroMovementComponent {
-    fn update(&mut self, position: Point, map_component: &mut Box<MapComponent>) -> Option<Point> {
+    fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point> {
         let char_point = Game::get_character_point();
         let last_char_point = Game::get_last_character_point();
 
@@ -75,7 +75,7 @@ impl TcodUserMovementComponent {
 }
 
 impl MovementComponent for TcodUserMovementComponent {
-    fn update(&mut self, position: Point, map_component: &mut Box<MapComponent>) -> Option<Point> {
+    fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point> {
         let offset = match Game::get_last_keypress() {
             Some(keypress) => {
                 match (keypress.code, keypress.printable) {
@@ -121,7 +121,7 @@ impl RandomMovementComponent {
 }
 
 impl MovementComponent for RandomMovementComponent {
-    fn update(&mut self, position: Point, map_component: &mut Box<MapComponent>) -> Option<Point> {
+    fn update(&mut self, position: Point, _map_component: &mut Box<dyn MapComponent>) -> Option<Point> {
         let mut offset = Point { x: position.x, y: position.y };
         let offset_x = rand::thread_rng().gen_range(0, 3i32) - 1;
         match self.window_bounds.contains(offset.offset_x(offset_x)) {

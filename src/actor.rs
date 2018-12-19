@@ -15,24 +15,24 @@ pub struct Actor {
     /// The character to render the `Actor` as
     pub display_char: char,
     /// The movement component dictating the way the `Actor` moves
-    pub movement_component: Box<MovementComponent + 'static>,
+    pub movement_component: Box<dyn MovementComponent + 'static>,
 }
 
 impl Actor {
     /// Creates a new actor, with all fields given as parameters
-    pub fn new(x: i32, y: i32, health: i32, is_player: bool, dc: char, mc: Box<MovementComponent>) -> Actor {
+    pub fn new(x: i32, y: i32, health: i32, is_player: bool, dc: char, mc: Box<dyn MovementComponent>) -> Actor {
         Actor { position: Point { x, y }, health, is_player, display_char: dc, movement_component: mc }
     }
 
     /// The function called on every tick of the game loop to take care of movement and so on
-    pub fn update(&mut self, map_component: &mut Box<MapComponent>) {
+    pub fn update(&mut self, map_component: &mut Box<dyn MapComponent>) {
         if let Some(position) = self.movement_component.update(self.position, map_component) {
             self.position = position;
         }
     }
 
     /// Delegates rendering to the passed rendering component
-    pub fn render(&self, rendering_component: &mut Box<RenderingComponent>) {
+    pub fn render(&self, rendering_component: &mut Box<dyn RenderingComponent>) {
         rendering_component.render_object(self.position, self.display_char);
     }
 
@@ -54,7 +54,7 @@ impl Actor {
     }
 
     /// Creates an the character to be played as
-    pub fn player(bound: Bound) -> Actor {
+    pub fn player() -> Actor {
         let point = Game::get_character_point();
         let mc: Box<TcodUserMovementComponent> = box TcodUserMovementComponent::new();
         Actor::new(point.x, point.y, 15, true, '@', mc)

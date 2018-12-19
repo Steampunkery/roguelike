@@ -7,7 +7,7 @@ use tcod::input::KeyCode;
 
 fn main() {
     let mut game = Game::new();
-    let mut c = Actor::player(game.window_bounds);
+    let mut c = Actor::player();
 
     for _ in 0..3 {
         // Get a random room

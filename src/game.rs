@@ -1,7 +1,6 @@
 use crate::level::Level;
 use crate::actor::Actor;
 use crate::util::{Point, Bound};
-use crate::map::MapComponent;
 use crate::rendering::{RenderingComponent, TcodRenderingComponent};
 
 use tcod::input::Key;
@@ -23,7 +22,7 @@ pub struct Game {
     /// The boundaries of the window (the size of the map display area)
     pub window_bounds: Bound,
     /// The component for rendering all the tiles in the game
-    pub rendering_component: Box<RenderingComponent + 'static>,
+    pub rendering_component: Box<dyn RenderingComponent + 'static>,
     /// A `Level` struct containing all the information on the current level
     pub level: Level
 }
