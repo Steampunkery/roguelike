@@ -74,8 +74,8 @@ impl RenderingComponent for TcodRenderingComponent {
     fn before_render_new_frame(&mut self) {
         self.console.clear();
 
-        let char_point = Game::get_character_point();
-        if char_point != Game::get_last_character_point() {
+        let char_point = Game::get_player_point();
+        if char_point != Game::get_last_player_point() {
             self.fov_map.compute_fov(char_point.x, char_point.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
         }
     }

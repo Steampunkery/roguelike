@@ -1,13 +1,14 @@
 #![feature(box_syntax)]
 use roguelike::game::Game;
 use roguelike::actor::Actor;
+use roguelike::player::Player;
 
 use rand::Rng;
 use tcod::input::KeyCode;
 
 fn main() {
     let mut game = Game::new();
-    let mut c = Actor::player();
+    let mut p = Player::new();
 
     for _ in 0..3 {
         // Get a random room
@@ -21,7 +22,7 @@ fn main() {
         game.level.mobs.push(Actor::kobold(rand_point.x, rand_point.y));
     }
 
-    game.render(&c);
+    game.render(&p);
     while !(game.rendering_component.get_root_console().window_closed() || game.exit) {
         // wait for user input
         let keypress = game.wait_for_keypress();
@@ -31,9 +32,11 @@ fn main() {
             KeyCode::Escape => game.exit = true,
             _ => {}
         }
-        game.update(&mut c);
+        if !game.update(&mut p) {
+            continue;
+        }
 
         // render
-        game.render(&c);
+        game.render(&p);
     }
 }

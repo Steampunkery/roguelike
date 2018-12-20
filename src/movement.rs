@@ -11,21 +11,29 @@ use rand::Rng;
 use tcod::colors::Color;
 use tcod::input::KeyCode;
 
+/// A trait for defining a method of movement
+/// that may be applied to any living monster.
 pub trait MovementComponent {
+    /// The method that decides the next move according to the implementation.
     fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point>;
 }
 
+/// A movement component that supplies random moves.
 pub struct RandomMovementComponent {
     window_bounds: Bound
 }
 
+/// A unit struct representing the players input.
 pub struct TcodUserMovementComponent;
 
+/// A movement component that uses A* to find the
+/// fastest path to the player.
 pub struct AggroMovementComponent {
     path: Vec<Point>,
 }
 
 impl AggroMovementComponent {
+    /// Convenience method for creating `AggroMovementComponent`s.
     pub fn new() -> AggroMovementComponent {
         AggroMovementComponent { path: vec![] }
     }
@@ -43,8 +51,8 @@ impl AggroMovementComponent {
 
 impl MovementComponent for AggroMovementComponent {
     fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point> {
-        let char_point = Game::get_character_point();
-        let last_char_point = Game::get_last_character_point();
+        let char_point = Game::get_player_point();
+        let last_char_point = Game::get_last_player_point();
 
         if DEBUG_AI { self.show_ai(map_component); }
 
@@ -69,6 +77,7 @@ impl MovementComponent for AggroMovementComponent {
 }
 
 impl TcodUserMovementComponent {
+    /// Convenience method for creating `TcodUserMovementComponents`.
     pub fn new() -> TcodUserMovementComponent {
         TcodUserMovementComponent
     }
@@ -103,7 +112,7 @@ impl MovementComponent for TcodUserMovementComponent {
         if let Some(movement) = offset {
             match map_component.is_blocked(movement.x, movement.y) {
                 false => {
-                    Game::set_last_character_point(position);
+                    Game::set_last_player_point(position);
                     return offset;
                 }
                 true => return None
@@ -115,6 +124,7 @@ impl MovementComponent for TcodUserMovementComponent {
 }
 
 impl RandomMovementComponent {
+    /// Convenience method for creating `RandomMovementComponents`.
     pub fn new(bound: Bound) -> RandomMovementComponent {
         RandomMovementComponent { window_bounds: bound }
     }

@@ -2,23 +2,30 @@ use crate::map::MapComponent;
 
 use pathfinding::prelude::absdiff;
 
+/// Deprecated. An enum for expressing the
+/// relationship of two X coordinates.
 pub enum XPointRelation {
     LeftOfPoint,
     RightOfPoint,
     OnPointX
 }
 
+/// Deprecated. An enum for expressing the
+/// relationship of two Y coordinates.
 pub enum YPointRelation {
     AbovePoint,
     BelowPoint,
     OnPointY
 }
 
+/// Deprecated. An enum for expressing the
+/// equality of two coordinates.
 pub enum PointEquality {
     PointsEqual,
     PointsNotEqual
 }
 
+/// The foundational struct for representing a coordinate.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Point {
     pub x: i32,
@@ -26,18 +33,22 @@ pub struct Point {
 }
 
 impl Point {
+    /// Create a new point with the given X offset.
     pub fn offset_x(&self, offset: i32) -> Point {
         Point { x: self.x + offset, y: self.y }
     }
 
+    /// Create a new point with the given Y offset.
     pub fn offset_y(&self, offset: i32) -> Point {
         Point { x: self.x, y: self.y + offset }
     }
 
+    /// Create a new point with an offset of the given point.
     pub fn offset(&self, offset: Point) -> Point {
         Point { x: self.x + offset.x, y: self.y + offset.y }
     }
 
+    /// Compare the x value of the current point against another
     pub fn compare_x(&self, point: Point) -> XPointRelation {
         use self::XPointRelation::*;
 
@@ -50,6 +61,7 @@ impl Point {
         }
     }
 
+    /// Compare the y value of the current point against another
     pub fn compare_y(&self, point: Point) -> YPointRelation {
         use self::YPointRelation::*;
 
@@ -62,6 +74,7 @@ impl Point {
         }
     }
 
+    /// Compare both axes of the current point against another
     pub fn compare(&self, point: Point) -> PointEquality {
         use self::PointEquality::*;
 
@@ -72,10 +85,13 @@ impl Point {
         }
     }
 
+    /// Get the absolute distance between the current point and another
     pub fn distance(&self, other: &Point) -> u32 {
         (absdiff(self.x, other.x) + absdiff(self.y, other.y)) as u32
     }
 
+    /// Determine which points adjoining the current point can be used
+    /// as a successor for the current point in an A* algorithm.
     pub fn successors(&self, map: &Box<dyn MapComponent>) -> Vec<(Point, u32)> {
         let (x, y) = (self.x, self.y);
         let mut successors = vec![];
@@ -92,11 +108,14 @@ impl Point {
     }
 }
 
+/// Deprecated. An enum for expressing whether
+/// a bound contains a point.
 pub enum Contains {
     DoesContain,
     DoesNotContain
 }
 
+/// A rectangle representing a boundary.
 #[derive(Copy, Clone)]
 pub struct Bound {
     pub min: Point,
@@ -104,6 +123,7 @@ pub struct Bound {
 }
 
 impl Bound {
+    /// Check whether the current bound contains a given point.
     pub fn contains(&self, point: Point) -> Contains {
         use self::Contains::*;
 
