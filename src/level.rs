@@ -48,7 +48,7 @@ impl Level {
     /// Propagates the turn boolean that indicates
     /// if the player pressed a valid key.
     pub fn update(&mut self, p: &mut Player) -> bool {
-        let took_turn = p.update(&mut self.map_component);
+        let took_turn = p.update(self);
         if !took_turn {
             return took_turn;
         }
