@@ -11,9 +11,9 @@ static mut PLAYER_POS: Point = Point { x: 0, y: 0 };
 
 // Make these constants two more than you want them to actually be
 /// The width of the map display area
-pub const MAP_WIDTH: i32 = 82;
+pub const MAP_WIDTH: i32 = 80;
 /// The height of the map display area
-pub const MAP_HEIGHT: i32 = 52;
+pub const MAP_HEIGHT: i32 = 50;
 
 /// Game struct containing all the information about the current game state
 pub struct Game {

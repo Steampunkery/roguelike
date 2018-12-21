@@ -1,6 +1,6 @@
 use crate::game::Game;
 use crate::util::Point;
-use crate::level::Item;
+use crate::item::Item;
 use crate::level::Level;
 use crate::rendering::RenderingComponent;
 use crate::movement::{TcodUserMovementComponent, MovementComponent};
@@ -8,7 +8,7 @@ use crate::movement::{TcodUserMovementComponent, MovementComponent};
 use tcod::input::KeyCode;
 
 /// Struct representing the player.
-pub struct Player {
+pub struct Player<'a> {
     /// The current position of the player.
     pub position: Point,
     /// The health of the player.
@@ -16,17 +16,26 @@ pub struct Player {
     /// The character to use to render the player.
     pub display_char: char,
     /// The inventory of the player.
-    pub inventory: Vec<Item>,
+    pub inventory: Vec<Box<Item>>,
     /// The movement component dictating the movement of the player
     pub movement_component: Box<dyn MovementComponent + 'static>,
+    /// The currently wielded item of the player
+    pub wielded: Option<&'a Box<Item>>
 }
 
-impl Player {
+impl<'a> Player<'a> {
     /// Creates a new player with some default values.
     /// Health at 15, display character of '@'.
-    pub fn new() -> Player {
+    pub fn new() -> Player<'a> {
         let mc: Box<TcodUserMovementComponent> = box TcodUserMovementComponent::new();
-        Player { position: Game::get_player_point(), health: 15, display_char: '@', inventory: vec![], movement_component: mc }
+        Player {
+            position: Game::get_player_point(),
+            health: 15,
+            display_char: '@',
+            inventory: vec![],
+            movement_component: mc,
+            wielded: None
+        }
     }
 
     /// Basic update method with a twist.
@@ -70,4 +79,13 @@ impl Player {
         }
         false
     }
+
+//    fn wield(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) -> bool {
+//        let mut keypress = rendering_component.wait_for_keypress();
+//        loop {
+//            if let Some(index) = keypress.printable.to_digit(10) {
+//
+//            }
+//        }
+//    }
 }

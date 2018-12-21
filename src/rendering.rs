@@ -47,7 +47,7 @@ impl TcodRenderingComponent {
     /// The `MapComponent` is needed for the initial calculation of the character's FOV
     pub fn new(bounds: Bound, map_component: &Box<dyn MapComponent>) -> Self {
         let console = Root::initializer()
-            .size(bounds.max.x + 1, bounds.max.y + 1)
+            .size(bounds.max.x, bounds.max.y)
             .title("Tom's Rogue-like")
             .fullscreen(false)
             .init();

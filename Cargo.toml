@@ -1,5 +1,4 @@
 [package]
-
 name = "roguelike"
 version = "0.0.5"
 authors = ["jmcfarland"]
@@ -10,3 +9,4 @@ tcod = "*"
 rand = "*"
 pathfinding = "*"
 hashbrown = "*"
+downcast-rs = "1.0.3"

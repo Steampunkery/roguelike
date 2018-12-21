@@ -147,7 +147,7 @@ impl DungeonMapComponent {
     /// Creates a new dungeon map with the default Rust random implementation
     pub fn new() -> DungeonMapComponent {
         // fill map with "unblocked" tiles
-        let mut map = vec![vec![Tile::wall(); (MAP_HEIGHT + 1) as usize]; (MAP_WIDTH + 1) as usize];
+        let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
         let mut rooms = vec![];
         let mut player_start = Point { x: 0, y: 0 };
 
@@ -156,8 +156,8 @@ impl DungeonMapComponent {
             let w = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
             let h = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
             // random position without going out of the boundaries of the map
-            let x = rand::thread_rng().gen_range(0, MAP_WIDTH - w);
-            let y = rand::thread_rng().gen_range(0, MAP_HEIGHT - h);
+            let x = rand::thread_rng().gen_range(0, MAP_WIDTH - w - 1);
+            let y = rand::thread_rng().gen_range(0, MAP_HEIGHT - h - 1);
 
             let new_room = Rect::new(x, y, w, h);
 
