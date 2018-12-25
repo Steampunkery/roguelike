@@ -14,6 +14,8 @@ static mut PLAYER_POS: Point = Point { x: 0, y: 0 };
 pub const MAP_WIDTH: i32 = 80;
 /// The height of the map display area
 pub const MAP_HEIGHT: i32 = 50;
+/// The y offset of the map from the top
+pub const MAP_OFFSET:i32 = 1;
 
 /// Game struct containing all the information about the current game state
 pub struct Game {
@@ -35,7 +37,7 @@ impl Game {
             max: Point { x: MAP_WIDTH, y: MAP_HEIGHT },
         };
 
-        let level = Level::new();
+        let level = Level::new(MAP_WIDTH, MAP_HEIGHT);
         let rc: Box<TcodRenderingComponent> = box TcodRenderingComponent::new(bounds, &level.map_component);
 
         unsafe { PLAYER_POS = level.map_component.get_player_start() };

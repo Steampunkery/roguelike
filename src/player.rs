@@ -16,11 +16,11 @@ pub struct Player<'a> {
     /// The character to use to render the player.
     pub display_char: char,
     /// The inventory of the player.
-    pub inventory: Vec<Box<Item>>,
+    pub inventory: Vec<Item>,
     /// The movement component dictating the movement of the player
     pub movement_component: Box<dyn MovementComponent + 'static>,
     /// The currently wielded item of the player
-    pub wielded: Option<&'a Box<Item>>
+    pub wielded: Option<&'a Item>
 }
 
 impl<'a> Player<'a> {

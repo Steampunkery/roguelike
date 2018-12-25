@@ -44,8 +44,8 @@ impl Point {
     }
 
     /// Create a new point with an offset of the given point.
-    pub fn offset(&self, offset: Point) -> Point {
-        Point { x: self.x + offset.x, y: self.y + offset.y }
+    pub fn offset(&self, x: i32, y: i32) -> Point {
+        Point { x: self.x + x, y: self.y + y }
     }
 
     /// Compare the x value of the current point against another
@@ -95,13 +95,16 @@ impl Point {
     pub fn successors(&self, map: &Box<dyn MapComponent>) -> Vec<(Point, u32)> {
         let (x, y) = (self.x, self.y);
         let mut successors = vec![];
-        for i in &[-1, 1] {
-            if !map.is_blocked(x, y + i) {
-                successors.push((Point { x, y: y + i }, 1));
-            }
+        for (index, i) in [(0, 1), (0, -1), (1, 0), (-1, 0), (-1, -1), (1, 1), (1, -1), (-1, 1)].iter().enumerate() {
+            if !map.is_blocked(x + i.0, y + i.1) {
+                let p = Point { x: x + i.0, y: y + i.1 };
 
-            if !map.is_blocked(x + i, y) {
-                successors.push((Point { x: x + i, y }, 1));
+                // prefer orthogonal movement to diagonal movement
+                if index < 4 {
+                    successors.push((p, 0));
+                } else {
+                    successors.push((p, 1));
+                }
             }
         }
         successors

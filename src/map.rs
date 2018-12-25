@@ -1,11 +1,9 @@
 use crate::util::Point;
+use crate::util::Bound;
 use crate::rendering::RenderingComponent;
 
 use rand::Rng;
 use tcod::Color;
-
-use crate::game::MAP_WIDTH;
-use crate::game::MAP_HEIGHT;
 
 /// Maximum height and width of a room.
 const ROOM_MAX_SIZE: i32 = 10;
@@ -97,6 +95,8 @@ pub trait MapComponent {
     fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>);
     /// Whether the supplied position has the `blocked` flag set.
     fn is_blocked(&self, x: i32, y: i32) -> bool;
+    /// Gets the bounds (size) of the map
+    fn get_bounds(&self) -> Bound;
 }
 
 /// Basic struct for simple dungeon levels.
@@ -106,7 +106,9 @@ pub struct DungeonMapComponent {
     /// The map object representing the level.
     pub map: Map,
     /// Where this particular map generator thinks the player should start.
-    pub player_start: Point
+    pub player_start: Point,
+    /// The bounds (size) of the map
+    pub bounds: Bound,
 }
 
 impl MapComponent for DungeonMapComponent {
@@ -127,8 +129,8 @@ impl MapComponent for DungeonMapComponent {
     }
 
     fn contains(&self, x: i32, y: i32) -> bool {
-        (x < MAP_WIDTH && x >= 0)
-        && (y < MAP_HEIGHT && y >= 0)
+        (x < self.bounds.max.x && x >= 0)
+        && (y < self.bounds.max.y && y >= 0)
     }
 
     fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
@@ -141,23 +143,30 @@ impl MapComponent for DungeonMapComponent {
         }
         return false;
     }
+
+    fn get_bounds(&self) -> Bound {
+        self.bounds
+    }
 }
 
 impl DungeonMapComponent {
     /// Creates a new dungeon map with the default Rust random implementation
-    pub fn new() -> DungeonMapComponent {
+    pub fn new(width: i32, height: i32) -> DungeonMapComponent {
         // fill map with "unblocked" tiles
-        let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
+        let mut map = vec![vec![Tile::wall(); height as usize]; width as usize];
         let mut rooms = vec![];
-        let mut player_start = Point { x: 0, y: 0 };
+
+        let zero_point = Point { x: 0, y: 0 };
+        let mut player_start = zero_point;
+        let bounds = Bound { min: zero_point, max: Point { x: width, y: height } };
 
         for _ in 0..MAX_ROOMS {
             // random width and height
             let w = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
             let h = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
             // random position without going out of the boundaries of the map
-            let x = rand::thread_rng().gen_range(0, MAP_WIDTH - w - 1);
-            let y = rand::thread_rng().gen_range(0, MAP_HEIGHT - h - 1);
+            let x = rand::thread_rng().gen_range(0, width - w - 1);
+            let y = rand::thread_rng().gen_range(0, height - h - 1);
 
             let new_room = Rect::new(x, y, w, h);
 
@@ -195,7 +204,8 @@ impl DungeonMapComponent {
         DungeonMapComponent {
             rooms,
             map,
-            player_start
+            player_start,
+            bounds
         }
     }
 

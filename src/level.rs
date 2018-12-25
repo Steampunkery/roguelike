@@ -18,8 +18,8 @@ pub struct Level {
 
 impl Level {
     /// Creates a basic level with a default dungeon map and some random items
-    pub fn new() -> Level {
-        let mc: Box<dyn MapComponent> = box DungeonMapComponent::new();
+    pub fn new(width: i32, height: i32) -> Level {
+        let mc: Box<dyn MapComponent> = box DungeonMapComponent::new(width, height);
         let items = crate::item::place_items(mc.get_rooms());
 
         Level {

@@ -9,7 +9,6 @@ use crate::util::{Bound, Point};
 
 use rand::Rng;
 use tcod::colors::Color;
-use tcod::input::KeyCode;
 
 /// A trait for defining a method of movement
 /// that may be applied to any living monster.
@@ -85,24 +84,19 @@ impl TcodUserMovementComponent {
 
 impl MovementComponent for TcodUserMovementComponent {
     fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point> {
+        use tcod::input::KeyCode::*;
         let offset = match Game::get_last_keypress() {
             Some(keypress) => {
                 match (keypress.code, keypress.printable) {
-                    (KeyCode::Up, _) => {
-                        Some(position.offset_y(-1))
-                    }
-                    (KeyCode::Down, _) => {
-                        Some(position.offset_y(1))
-                    }
-                    (KeyCode::Left, _) => {
-                        Some(position.offset_x(-1))
-                    }
-                    (KeyCode::Right, _) => {
-                        Some(position.offset_x(1))
-                    }
-                    (KeyCode::Char, '.') => {
-                        Some(position)
-                    }
+                    (NumPad8, _) | (Up, _) => Some(position.offset_y(-1)),
+                    (NumPad2, _) | (Down, _) => Some(position.offset_y(1)),
+                    (NumPad4, _) | (Left, _) => Some(position.offset_x(-1)),
+                    (NumPad6, _) | (Right, _) => Some(position.offset_x(1)),
+                    (NumPad7, _) => Some(position.offset(-1, -1)),
+                    (NumPad9, _) => Some(position.offset(1, -1)),
+                    (NumPad1, _) => Some(position.offset(-1, 1)),
+                    (NumPad3, _) => Some(position.offset(1, 1)),
+                    (Char, '.') => Some(position),
                     _ => None
                 }
             }
