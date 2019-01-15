@@ -32,7 +32,10 @@ fn main() {
             KeyCode::Escape => game.exit = true,
             _ => {}
         }
-        if !game.update(&mut p) {
+
+        game.update(&mut p);
+
+        if !game.did_take_turn {
             continue;
         }
 

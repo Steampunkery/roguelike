@@ -9,13 +9,12 @@ static mut LAST_KEYPRESS: Option<Key> = None;
 static mut LAST_PLAYER_POS: Point = Point { x: -1, y: -1 };
 static mut PLAYER_POS: Point = Point { x: 0, y: 0 };
 
-// Make these constants two more than you want them to actually be
+/// The y offset of the map from the top
+pub const MAP_OFFSET: i32 = 5; // 1 line for messages, one for padding
 /// The width of the map display area
 pub const MAP_WIDTH: i32 = 80;
 /// The height of the map display area
 pub const MAP_HEIGHT: i32 = 50;
-/// The y offset of the map from the top
-pub const MAP_OFFSET:i32 = 1;
 
 /// Game struct containing all the information about the current game state
 pub struct Game {
@@ -27,6 +26,12 @@ pub struct Game {
     pub rendering_component: Box<dyn RenderingComponent + 'static>,
     /// A `Level` struct containing all the information on the current level
     pub level: Level,
+    /// Whether the player made a move
+    pub did_take_turn: bool,
+    /// A vector of messages to show to the player
+    pub messages: Vec<String>,
+    /// Where we are in the massages vector
+    pub message_seek: usize,
 }
 
 impl Game {
@@ -34,7 +39,7 @@ impl Game {
     pub fn new() -> Game {
         let bounds = Bound {
             min: Point { x: 0, y: 0 },
-            max: Point { x: MAP_WIDTH, y: MAP_HEIGHT },
+            max: Point { x: MAP_WIDTH, y: MAP_HEIGHT + MAP_OFFSET },
         };
 
         let level = Level::new(MAP_WIDTH, MAP_HEIGHT);
@@ -42,16 +47,21 @@ impl Game {
 
         unsafe { PLAYER_POS = level.map_component.get_player_start() };
         Game {
+            level,
             exit: false,
             window_bounds: bounds,
             rendering_component: rc,
-            level,
+            did_take_turn: false,
+            messages: vec!["Welcome to MR: TOM".to_string()],
+            message_seek: 0,
         }
     }
 
     /// Delegates rendering of the map, mobs, and player to the `rendering_component` in the correct order
     pub fn render(&mut self, p: &Player) {
         self.rendering_component.before_render_new_frame();
+
+        self.refresh_messages();
 
         self.level.render(&mut self.rendering_component);
         p.render(&mut self.rendering_component);
@@ -60,8 +70,15 @@ impl Game {
     }
 
     /// Calls the update methods of ALL objects in the domain of the game. Think player, items, mobs, etc.
-    pub fn update(&mut self, p: &mut Player) -> bool {
-        self.level.update(p)
+    pub fn update(&mut self, p: &mut Player) {
+        self.did_take_turn = self.level.update(p);
+    }
+
+    pub fn refresh_messages(&mut self) {
+        self.message_seek = if self.messages.len() < 5 { 0 } else { self.messages.len() % 5 };
+        for (i, message) in self.messages.iter().skip(self.message_seek).enumerate() {
+            self.rendering_component.write_message(message, 0, (i as i32 - 4).abs());
+        }
     }
 
     /// Returns the last keypress received by the game loop

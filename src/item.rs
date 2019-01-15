@@ -49,7 +49,8 @@ pub enum ItemType {
 /// Struct representing a single item on the map
 pub struct Item {
     pub position: Point,
-    pub item_type: ItemType
+    pub item_type: ItemType,
+    pub name: String,
 }
 
 impl Item {
@@ -68,7 +69,11 @@ pub fn place_items(rooms: &Vec<Rect>) -> ItemsMap {
     let mut items = ItemsMap::new();
     let room = rooms[0];
     let rand_point = room.rand_point();
-    items.insert(rand_point, Item { position: rand_point, item_type: ItemType::WEAPON });
+    items.insert(rand_point, Item {
+        position: rand_point,
+        item_type: ItemType::WEAPON,
+        name: "Sword".to_string(),
+    });
 
     items
 }

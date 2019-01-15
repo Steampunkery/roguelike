@@ -1,7 +1,7 @@
 use crate::game::Game;
 use crate::map::{MapComponent, Map};
 use crate::util::{Point, Bound};
-use crate::game::{MAP_WIDTH, MAP_HEIGHT};
+use crate::game::{MAP_WIDTH, MAP_HEIGHT, MAP_OFFSET};
 
 use tcod::Color;
 use tcod::input::Key;
@@ -26,6 +26,8 @@ pub trait RenderingComponent {
     fn render_tile(&mut self, x: i32, y: i32, symbol: char, explored: &mut bool);
     /// Renders a single object
     fn render_object(&mut self, point: Point, symbol: char);
+    /// Writes a given message to a point in the console
+    fn write_message(&mut self, message: &String, x: i32, y: i32);
     /// Hook method to be executed after each frame is done being rendered completely
     fn after_render_new_frame(&mut self);
     /// Wait for keypresses in the console
@@ -48,7 +50,7 @@ impl TcodRenderingComponent {
     pub fn new(bounds: Bound, map_component: &Box<dyn MapComponent>) -> Self {
         let console = Root::initializer()
             .size(bounds.max.x, bounds.max.y)
-            .title("Tom's Rogue-like")
+            .title("Monochrome Rogue-like: The Original Masterpiece")
             .fullscreen(false)
             .init();
 
@@ -87,13 +89,13 @@ impl RenderingComponent for TcodRenderingComponent {
                 let color_override = map[x][y].color_override;
 
                 if !wall {
-                    self.render_tile(x as i32, y as i32, '.', &mut map[x][y].explored);
+                    self.render_tile(x as i32, y     as i32, '.', &mut map[x][y].explored);
                 } else {
                     self.render_tile(x as i32, y as i32, '+', &mut map[x][y].explored);
                 }
 
                 if let Some(color) = color_override {
-                    self.console.set_char_background(x as i32, y as i32, color, BackgroundFlag::Set);
+                    self.console.set_char_background(x as i32, y as i32 + MAP_OFFSET, color, BackgroundFlag::Set);
                     map[x][y].color_override = None;
                 }
             }
@@ -102,18 +104,22 @@ impl RenderingComponent for TcodRenderingComponent {
 
     fn render_tile(&mut self, x: i32, y: i32, symbol: char, explored: &mut bool) {
         if self.fov_map.is_in_fov(x, y) {
-            self.console.put_char(x, y, symbol, BackgroundFlag::Set);
+            self.console.put_char(x, y + MAP_OFFSET, symbol, BackgroundFlag::Set);
             *explored = true;
         } else if *explored {
-            self.console.put_char(x, y, symbol, BackgroundFlag::Set);
-            self.console.set_char_foreground(x, y, Color { r: 105, g: 105, b: 105 });
+            self.console.put_char(x, y + MAP_OFFSET, symbol, BackgroundFlag::Set);
+            self.console.set_char_foreground(x, y + MAP_OFFSET, Color { r: 105, g: 105, b: 105 });
         }
     }
 
     fn render_object(&mut self, position: Point, symbol: char) {
         if self.fov_map.is_in_fov(position.x, position.y) {
-            self.console.put_char(position.x, position.y, symbol, BackgroundFlag::Set);
+            self.console.put_char(position.x, position.y + MAP_OFFSET, symbol, BackgroundFlag::Set);
         }
+    }
+
+    fn write_message(&mut self, message: &String, x: i32, y: i32) {
+        self.console.print(x, y, message);
     }
 
     fn after_render_new_frame(&mut self) {
