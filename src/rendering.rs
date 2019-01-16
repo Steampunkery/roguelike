@@ -89,7 +89,7 @@ impl RenderingComponent for TcodRenderingComponent {
                 let color_override = map[x][y].color_override;
 
                 if !wall {
-                    self.render_tile(x as i32, y     as i32, '.', &mut map[x][y].explored);
+                    self.render_tile(x as i32, y as i32, '.', &mut map[x][y].explored);
                 } else {
                     self.render_tile(x as i32, y as i32, '+', &mut map[x][y].explored);
                 }

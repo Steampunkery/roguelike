@@ -13,12 +13,14 @@ pub struct Actor {
     pub display_char: char,
     /// The movement component dictating the way the `Actor` moves
     pub movement_component: Box<dyn MovementComponent + 'static>,
+    /// Whether the mob is aggro'd to the player
+    pub is_hostile: bool,
 }
 
 impl Actor {
     /// Creates a new actor, with all fields given as parameters
-    pub fn new(x: i32, y: i32, health: i32, dc: char, mc: Box<dyn MovementComponent>) -> Actor {
-        Actor { position: Point { x, y }, health, display_char: dc, movement_component: mc }
+    pub fn new(x: i32, y: i32, health: i32, dc: char, mc: Box<dyn MovementComponent>, is_hostile: bool) -> Actor {
+        Actor { position: Point { x, y }, health, display_char: dc, movement_component: mc, is_hostile }
     }
 
     /// The function called on every tick of the game loop to take care of movement and so on
@@ -41,18 +43,18 @@ impl Actor {
     /// Creates an `Actor` with traits of a dog
     pub fn dog(x: i32, y: i32, bound: Bound) -> Actor {
         let mc: Box<RandomMovementComponent> = box RandomMovementComponent::new(bound);
-        Actor::new(x, y, 10, 'd', mc)
+        Actor::new(x, y, 10, 'd', mc, false)
     }
 
     /// Creates an `Actor` with traits of a cat
     pub fn cat(x: i32, y: i32, bound: Bound) -> Actor {
         let mc: Box<RandomMovementComponent> = box RandomMovementComponent::new(bound);
-        Actor::new(x, y, 5, 'c', mc)
+        Actor::new(x, y, 5, 'c', mc, false)
     }
 
     /// Creates an `Actor` with traits of a kobold
     pub fn kobold(x: i32, y: i32) -> Actor {
         let mc: Box<AggroMovementComponent> = box AggroMovementComponent::new();
-        Actor::new(x, y, 12, 'k', mc)
+        Actor::new(x, y, 12, 'k', mc, true)
     }
 }

@@ -7,8 +7,8 @@ use rand::Rng;
 use tcod::input::KeyCode;
 
 fn main() {
-    let mut game = Game::new();
-    let mut p = Player::new();
+    let p = Player::new();
+    let mut game = Game::new(p);
 
     for _ in 0..3 {
         // Get a random room
@@ -22,7 +22,7 @@ fn main() {
         game.level.mobs.push(Actor::kobold(rand_point.x, rand_point.y));
     }
 
-    game.render(&p);
+    game.render();
     while !(game.rendering_component.get_root_console().window_closed() || game.exit) {
         // wait for user input
         let keypress = game.wait_for_keypress();
@@ -33,13 +33,13 @@ fn main() {
             _ => {}
         }
 
-        game.update(&mut p);
+        game.update();
 
         if !game.did_take_turn {
             continue;
         }
 
         // render
-        game.render(&p);
+        game.render();
     }
 }

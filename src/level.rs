@@ -30,7 +30,7 @@ impl Level {
     }
 
     /// Calls the render method of the following things in order: Map, Mobs, Items
-    pub fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
+    pub fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>, player: &Player) {
         self.map_component.render(rendering_component);
         for item in self.items.values() {
             item.render(rendering_component);
@@ -38,6 +38,7 @@ impl Level {
         for i in self.mobs.iter() {
             i.render(rendering_component);
         }
+        player.render(rendering_component);
     }
 
     /// Updates all the living things on the level.
