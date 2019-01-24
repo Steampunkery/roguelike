@@ -26,10 +26,10 @@ pub struct Player<'a> {
 impl<'a> Player<'a> {
     /// Creates a new player with some default values.
     /// Health at 15, display character of '@'.
-    pub fn new() -> Player<'a> {
+    pub fn new(start_pos: Point) -> Player<'a> {
         let mc: Box<TcodUserMovementComponent> = box TcodUserMovementComponent::new();
         Player {
-            position: Game::get_player_point(),
+            position: start_pos,
             health: 15,
             display_char: '@',
             inventory: vec![],

@@ -16,13 +16,6 @@ pub const MAP_WIDTH: i32 = 80;
 /// The height of the map display area
 pub const MAP_HEIGHT: i32 = 50;
 
-pub trait GameState {
-    fn new() -> Self;
-
-    fn update(&mut self, game: &mut Game);
-    fn render(&mut self, game: &mut Game);
-}
-
 /// Game struct containing all the information about the current game state
 pub struct Game<'a> {
     /// Whether the game should exit on the next loop
@@ -44,7 +37,7 @@ pub struct Game<'a> {
 
 impl<'a> Game<'a> {
     /// Creates a new game struct complete with a first level and rendering component
-    pub fn new(mut p: Player) -> Game {
+    pub fn new() -> Game<'a> {
         let bounds = Bound {
             min: Point { x: 0, y: 0 },
             max: Point { x: MAP_WIDTH, y: MAP_HEIGHT + MAP_OFFSET },
@@ -55,7 +48,7 @@ impl<'a> Game<'a> {
 
         let p_start = level.map_component.get_player_start();
         Self::set_player_point(p_start);
-        p.position = p_start;
+        let p = Player::new(p_start);
         
         Game {
             level,
@@ -129,31 +122,3 @@ impl<'a> Game<'a> {
         return ks;
     }
 }
-
-//pub struct MovementState;
-//
-//impl GameState for MovementGameState {
-//    fn new() -> MovementGameState {
-//        MovementGameState
-//    }
-//
-//    fn update(&mut self, game: &mut Game) {
-//        character.update();
-//        Game::set_character_point(character.position);
-//        for npc in npcs.iter_mut() {
-//            npc.update();
-//        }
-//    }
-//
-//    fn render(&mut self, renderer: &mut Box<RenderingComponent>, npcs: &Vec<Box<Actor>>, character: &Actor, windows: &mut Vec<&mut Box<WindowComponent>>) {
-//        renderer.before_render_new_frame();
-//        for window in windows.iter_mut() {
-//            renderer.attach_window(*window);
-//        }
-//        for npc in npcs.iter() {
-//            npc.render(renderer);
-//        }
-//        character.render(renderer);
-//        renderer.after_render_new_frame();
-//    }
-//}

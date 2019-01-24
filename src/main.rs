@@ -1,14 +1,12 @@
 #![feature(box_syntax)]
 use roguelike::game::Game;
 use roguelike::actor::Actor;
-use roguelike::player::Player;
 
 use rand::Rng;
 use tcod::input::KeyCode;
 
 fn main() {
-    let p = Player::new();
-    let mut game = Game::new(p);
+    let mut game = Game::new();
 
     for _ in 0..3 {
         // Get a random room

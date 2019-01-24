@@ -56,3 +56,41 @@ impl Level {
         took_turn
     }
 }
+
+pub trait State {
+    fn new() -> Self;
+    fn should_update_state(&self) -> bool;
+
+    fn enter(&self) {}
+    fn exit(&self) {}
+
+    fn update(&mut self, game: &mut Game);
+    fn render(&mut self, game: &mut Game) {
+        game.rendering_component.before_render_new_frame();
+        for mob in game.level.mobs.iter() {
+            mob.render(&mut game.rendering_component);
+        }
+        game.player.render(&mut game.rendering_component);
+        game.rendering_component.after_render_new_frame();
+    }
+}
+
+pub struct MovementState;
+
+impl State for MovementState {
+    fn new() -> MovementState {
+        MovementState
+    }
+
+    fn should_update_state(&self) -> bool {
+        true
+    }
+
+    fn update(&mut self, game: &mut Game) {
+        game.player.update(&mut game.level);
+        Game::set_player_point(game.player.position);
+        for mob in game.level.mobs.iter_mut() {
+            mob.update(&mut game.level.map_component);
+        }
+    }
+}
