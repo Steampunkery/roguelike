@@ -3,6 +3,7 @@ use crate::util::Bound;
 use crate::rendering::RenderingComponent;
 
 use rand::Rng;
+use rand_isaac::IsaacRng;
 use tcod::Color;
 
 /// Maximum height and width of a room.
@@ -69,10 +70,10 @@ impl Rect {
             (self.y1 <= other.y2) && (self.y2 >= other.y1)
     }
 
-    pub fn rand_point(&self) -> Point {
+    pub fn rand_point(&self, random: &mut IsaacRng) -> Point {
         Point {
-            x: rand::thread_rng().gen_range(self.x1 + 1, self.x2),
-            y: rand::thread_rng().gen_range(self.y1 + 1, self.y2),
+            x: random.gen_range(self.x1 + 1, self.x2),
+            y: random.gen_range(self.y1 + 1, self.y2),
         }
     }
 }
@@ -151,7 +152,7 @@ impl MapComponent for DungeonMapComponent {
 
 impl DungeonMapComponent {
     /// Creates a new dungeon map with the default Rust random implementation
-    pub fn new(width: i32, height: i32) -> DungeonMapComponent {
+    pub fn new(width: i32, height: i32, random: &mut IsaacRng) -> DungeonMapComponent {
         // fill map with "unblocked" tiles
         let mut map = vec![vec![Tile::wall(); height as usize]; width as usize];
         let mut rooms = vec![];
@@ -162,11 +163,11 @@ impl DungeonMapComponent {
 
         for _ in 0..MAX_ROOMS {
             // random width and height
-            let w = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
-            let h = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
+            let w = random.gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
+            let h = random.gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
             // random position without going out of the boundaries of the map
-            let x = rand::thread_rng().gen_range(0, width - w - 1);
-            let y = rand::thread_rng().gen_range(0, height - h - 1);
+            let x = random.gen_range(0, width - w - 1);
+            let y = random.gen_range(0, height - h - 1);
 
             let new_room = Rect::new(x, y, w, h);
 
@@ -187,7 +188,7 @@ impl DungeonMapComponent {
                     let (prev_x, prev_y) = rooms[rooms.len() - 1].center();
 
                     // coin flip
-                    if rand::random() {
+                    if random.gen_bool(1.0/2.0) {
                         Self::create_h_tunnel(prev_x, new_x, prev_y, &mut map);
                         Self::create_v_tunnel(prev_y, new_y, new_x, &mut map);
                     } else {

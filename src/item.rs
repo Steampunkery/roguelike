@@ -4,6 +4,8 @@ use crate::rendering::RenderingComponent;
 
 use hashbrown::HashMap;
 
+use rand_isaac::IsaacRng;
+
 // These constants shamelessly copy/pasted from NetHack source code
 const ILLOBJ_SYM: char = ']'; /* also used for mimics */
 const WEAPON_SYM: char = ')';
@@ -65,10 +67,10 @@ impl Item {
 }
 
 /// Given a vector of rooms, return a hashmap of points containing items
-pub fn place_items(rooms: &Vec<Rect>) -> ItemsMap {
+pub fn place_items(rooms: &Vec<Rect>, random: &mut IsaacRng) -> ItemsMap {
     let mut items = ItemsMap::new();
     let room = rooms[0];
-    let rand_point = room.rand_point();
+    let rand_point = room.rand_point(random);
     items.insert(rand_point, Item {
         position: rand_point,
         item_type: ItemType::WEAPON,

@@ -5,6 +5,8 @@ use crate::player::Player;
 use crate::rendering::RenderingComponent;
 use crate::map::{DungeonMapComponent, MapComponent};
 
+use rand_isaac::IsaacRng;
+
 /// Struct containing all of the data necessary
 /// for representing a single level of the game.
 pub struct Level {
@@ -18,9 +20,9 @@ pub struct Level {
 
 impl Level {
     /// Creates a basic level with a default dungeon map and some random items
-    pub fn new(width: i32, height: i32) -> Level {
-        let mc: Box<dyn MapComponent> = box DungeonMapComponent::new(width, height);
-        let items = crate::item::place_items(mc.get_rooms());
+    pub fn new(width: i32, height: i32, random: &mut IsaacRng) -> Level {
+        let mc: Box<dyn MapComponent> = box DungeonMapComponent::new(width, height, random);
+        let items = crate::item::place_items(mc.get_rooms(), random);
 
         Level {
             mobs: vec![],
@@ -75,11 +77,11 @@ pub trait State {
     }
 }
 
-pub struct MovementState;
+pub struct PlayState;
 
-impl State for MovementState {
-    fn new() -> MovementState {
-        MovementState
+impl State for PlayState {
+    fn new() -> PlayState {
+        PlayState
     }
 
     fn should_update_state(&self) -> bool {

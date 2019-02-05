@@ -56,6 +56,7 @@ impl TcodRenderingComponent {
 
         let map = map_component.get_map();
 
+        // Build FOV map
         let mut fov_map = FovMap::new(MAP_WIDTH, MAP_HEIGHT);
         for y in 0..MAP_HEIGHT {
             for x in 0..MAP_WIDTH {

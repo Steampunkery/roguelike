@@ -7,5 +7,7 @@ edition = "2018"
 [dependencies]
 tcod = "*"
 rand = "*"
+rand_isaac = "*"
 pathfinding = "*"
 hashbrown = "*"
+dirs = "*"

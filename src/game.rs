@@ -5,6 +5,10 @@ use crate::rendering::{RenderingComponent, TcodRenderingComponent};
 
 use tcod::input::Key;
 
+use rand::RngCore;
+use rand::SeedableRng;
+use rand_isaac::IsaacRng;
+
 static mut LAST_KEYPRESS: Option<Key> = None;
 static mut LAST_PLAYER_POS: Point = Point { x: -1, y: -1 };
 static mut PLAYER_POS: Point = Point { x: 0, y: 0 };
@@ -33,24 +37,30 @@ pub struct Game<'a> {
     pub messages: Vec<String>,
     /// Where we are in the massages vector
     pub message_seek: usize,
+    /// The game's RNG
+    pub random: IsaacRng,
+    /// The game's RNG seed
+    pub seed: u64,
 }
 
 impl<'a> Game<'a> {
     /// Creates a new game struct complete with a first level and rendering component
-    pub fn new() -> Game<'a> {
+    pub fn new(old_seed: Option<u64>) -> Game<'a> {
         let bounds = Bound {
             min: Point { x: 0, y: 0 },
             max: Point { x: MAP_WIDTH, y: MAP_HEIGHT + MAP_OFFSET },
         };
 
-        let level = Level::new(MAP_WIDTH, MAP_HEIGHT);
-        let rc: Box<TcodRenderingComponent> = box TcodRenderingComponent::new(bounds, &level.map_component);
+        let (mut isaac, seed) = Self::init_rng(old_seed);
 
-        let p_start = level.map_component.get_player_start();
-        Self::set_player_point(p_start);
-        let p = Player::new(p_start);
+        let level = Self::init_level(&mut isaac);
+
+        let rc = Self::init_renderer(bounds, &level);
+
+        let p = Self::init_player(level.map_component.get_player_start());
         
         Game {
+            seed,
             level,
             player: p,
             exit: false,
@@ -59,6 +69,30 @@ impl<'a> Game<'a> {
             did_take_turn: false,
             messages: vec!["Welcome to MR: TOM".to_string()],
             message_seek: 0,
+            random: isaac,
+        }
+    }
+
+    fn init_player(p_start: Point) -> Player<'a> {
+        Self::set_player_point(p_start);
+        Player::new(p_start)
+    }
+
+    fn init_renderer(bounds: Bound, level: &Level) -> Box<dyn RenderingComponent + 'static> {
+        box TcodRenderingComponent::new(bounds, &level.map_component)
+    }
+
+    fn init_level(random: &mut IsaacRng) -> Level {
+        Level::new(MAP_WIDTH, MAP_HEIGHT, random)
+    }
+
+    fn init_rng(old_seed: Option<u64>) -> (IsaacRng, u64) {
+        if let Some(s) = old_seed {
+            (IsaacRng::seed_from_u64(s), s)
+        } else {
+            let mut rng = rand::thread_rng();
+            let new_seed = rng.next_u64();
+            (IsaacRng::seed_from_u64(new_seed), new_seed)
         }
     }
 
