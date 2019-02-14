@@ -1,4 +1,5 @@
 use crate::game::Game;
+use crate::actor::Mob;
 use crate::actor::Actor;
 use crate::item::ItemsMap;
 use crate::player::Player;
@@ -11,7 +12,7 @@ use rand_isaac::IsaacRng;
 /// for representing a single level of the game.
 pub struct Level {
     /// A vector of the friendly and aggressive mobs on the level
-    pub mobs: Vec<Actor>,
+    pub mobs: Vec<Mob>,
     /// A vector of all the items on the level
     pub items: ItemsMap,
     /// The actual `MapComponent` that hold the meat of the level data
@@ -27,13 +28,13 @@ impl Level {
         Level {
             mobs: vec![],
             items,
-            map_component: mc
+            map_component: mc,
         }
     }
 
     /// Calls the render method of the following things in order: Map, Mobs, Items
     pub fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>, player: &Player) {
-        self.map_component.render(rendering_component);
+        self.map_component.render(rendering_component, player);
         for item in self.items.values() {
             item.render(rendering_component);
         }
@@ -44,18 +45,17 @@ impl Level {
     }
 
     /// Updates all the living things on the level.
-    /// Propagates the turn boolean that indicates
-    /// if the player pressed a valid key.
-    pub fn update(&mut self, p: &mut Player) -> bool {
-        let took_turn = p.update(self);
-        if !took_turn {
-            return took_turn;
+    pub fn update(&mut self, p: &mut Player) {
+        p.update(self);
+        if let Some(action) = p.action {
+            action.perform(&mut self.map_component);
+        } else {
+            return;
         }
-        Game::set_player_point(p.position);
+
         for i in self.mobs.iter_mut() {
-            i.update(&mut self.map_component);
+            i.update(&mut self.map_component, &*p);
         }
-        took_turn
     }
 }
 
@@ -89,10 +89,7 @@ impl State for PlayState {
     }
 
     fn update(&mut self, game: &mut Game) {
-        game.player.update(&mut game.level);
-        Game::set_player_point(game.player.position);
-        for mob in game.level.mobs.iter_mut() {
-            mob.update(&mut game.level.map_component);
-        }
+//        game.player.update(&mut game.level);
+//        Game::set_player_point(game.player.get_position());
     }
 }

@@ -10,8 +10,6 @@ use rand::SeedableRng;
 use rand_isaac::IsaacRng;
 
 static mut LAST_KEYPRESS: Option<Key> = None;
-static mut LAST_PLAYER_POS: Point = Point { x: -1, y: -1 };
-static mut PLAYER_POS: Point = Point { x: 0, y: 0 };
 
 /// The y offset of the map from the top
 pub const MAP_OFFSET: i32 = 5; // 1 line for messages, one for padding
@@ -33,8 +31,6 @@ pub struct Game<'a> {
     pub rendering_component: Box<dyn RenderingComponent + 'static>,
     /// A `Level` struct containing all the information on the current level
     pub level: Level,
-    /// Whether the player made a move
-    pub did_take_turn: bool,
     /// A vector of messages to show to the player
     pub messages: Vec<String>,
     /// Where we are in the massages vector
@@ -68,7 +64,6 @@ impl<'a> Game<'a> {
             exit: false,
             window_bounds: bounds,
             rendering_component: rc,
-            did_take_turn: false,
             messages: vec!["Welcome to MR: TOM".to_string()],
             message_seek: 0,
             random: isaac,
@@ -76,7 +71,6 @@ impl<'a> Game<'a> {
     }
 
     fn init_player(p_start: Point) -> Player<'a> {
-        Self::set_player_point(p_start);
         Player::new(p_start)
     }
 
@@ -111,7 +105,7 @@ impl<'a> Game<'a> {
 
     /// Calls the update methods of ALL objects in the domain of the game. Think player, items, mobs, etc.
     pub fn update(&mut self) {
-        self.did_take_turn = self.level.update(&mut self.player);
+        self.level.update(&mut self.player);
     }
 
     pub fn refresh_messages(&mut self) {
@@ -129,26 +123,6 @@ impl<'a> Game<'a> {
     /// Sets the last keypress as it is received from the game loop
     pub fn set_last_keypress(ks: Key) {
         unsafe { LAST_KEYPRESS = Some(ks); }
-    }
-
-    /// Returns the current `Point` the player is at
-    pub fn get_player_point() -> Point {
-        unsafe { PLAYER_POS }
-    }
-
-    /// Sets the current `Point` that the player is at
-    pub fn set_player_point(point: Point) {
-        unsafe { PLAYER_POS = point; }
-    }
-
-    /// Returns the previous position of the player
-    pub fn get_last_player_point() -> Point {
-        unsafe { LAST_PLAYER_POS }
-    }
-
-    /// Sets the previous position of the player
-    pub fn set_last_player_point(point: Point) {
-        unsafe { LAST_PLAYER_POS = point; }
     }
 
     /// Receives the keypresses in the game loop

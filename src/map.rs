@@ -1,5 +1,6 @@
 use crate::util::Point;
 use crate::util::Bound;
+use crate::player::Player;
 use crate::rendering::RenderingComponent;
 use crate::game::MAP_OFFSET;
 
@@ -22,7 +23,7 @@ pub type Map = Vec<Vec<Tile>>;
 pub struct Tile {
     /// Whether the tile blocks walking paths.
     pub blocked: bool,
-    /// Whether the tile blocks the sight of `Actor`s.
+    /// Whether the tile blocks the sight of `Mob`s.
     pub block_sight: bool,
     /// Whether the tile has been explored by the player.
     pub explored: bool,
@@ -94,7 +95,7 @@ pub trait MapComponent {
     /// Whether the current map display area contains a point.
     fn contains(&self, x: i32, y: i32) -> bool;
     /// Render the underlying map object.
-    fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>);
+    fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>, player: &Player);
     /// Whether the supplied position has the `blocked` flag set.
     fn is_blocked(&self, x: i32, y: i32) -> bool;
     /// Gets the bounds (size) of the map
@@ -135,8 +136,8 @@ impl MapComponent for DungeonMapComponent {
         && (y < self.bounds.max.y && y >= 0)
     }
 
-    fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
-        rendering_component.render_map(&mut self.map);
+    fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>, player: &Player) {
+        rendering_component.render_map(&mut self.map, player);
     }
 
     fn is_blocked(&self, x: i32, y: i32) -> bool {

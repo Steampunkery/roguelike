@@ -1,7 +1,8 @@
-use crate::game::Game;
+use crate::player::Player;
 use crate::map::{MapComponent, Map};
 use crate::util::{Point, Bound};
 use crate::game::{MAP_WIDTH, MAP_HEIGHT, MAP_OFFSET, SHOW};
+use crate::actor::Actor;
 
 use tcod::Color;
 use tcod::input::Key;
@@ -21,7 +22,7 @@ pub trait RenderingComponent {
     /// Hook method to be executed before each frame
     fn before_render_new_frame(&mut self);
     /// Renders every explored tile in a `Map`
-    fn render_map(&mut self, map: &mut Map);
+    fn render_map(&mut self, map: &mut Map, player: &Player);
     /// Renders a specific explored tile
     fn render_tile(&mut self, x: i32, y: i32, symbol: char, explored: &mut bool);
     /// Renders a single object
@@ -74,16 +75,15 @@ impl TcodRenderingComponent {
 }
 
 impl RenderingComponent for TcodRenderingComponent {
-    fn before_render_new_frame(&mut self) {
-        self.console.clear();
+    fn before_render_new_frame(&mut self) { self.console.clear(); }
 
-        let char_point = Game::get_player_point();
-        if char_point != Game::get_last_player_point() {
+    fn render_map(&mut self, map: &mut Map, player: &Player) {
+        // Recompute the FOV before we render the map
+        let char_point = player.get_position();
+        if char_point != player.get_last_position() {
             self.fov_map.compute_fov(char_point.x, char_point.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
         }
-    }
 
-    fn render_map(&mut self, map: &mut Map) {
         for x in 0..map.len() - 1 {
             for y in 0..map[x].len() - 1 {
                 let wall = map[x][y].block_sight;

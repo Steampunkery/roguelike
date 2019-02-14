@@ -1,29 +1,21 @@
-use crate::game::Game;
 use crate::map::MapComponent;
 
 use crate::ai::DEBUG_AI;
 use crate::ai::find_astar_path;
 
-use crate::util::Contains::*;
-use crate::util::{Bound, Point};
+use crate::util::Point;
 
-use rand::Rng;
+use crate::actor::Actor;
+use crate::player::Player;
+
 use tcod::colors::Color;
 
 /// A trait for defining a method of movement
 /// that may be applied to any living monster.
 pub trait MovementComponent {
     /// The method that decides the next move according to the implementation.
-    fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point>;
+    fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>, player: &Player) -> Option<Point>;
 }
-
-/// A movement component that supplies random moves.
-pub struct RandomMovementComponent {
-    window_bounds: Bound
-}
-
-/// A unit struct representing the players input.
-pub struct TcodUserMovementComponent;
 
 /// A movement component that uses A* to find the
 /// fastest path to the player.
@@ -51,14 +43,14 @@ impl AggroMovementComponent {
 }
 
 impl MovementComponent for AggroMovementComponent {
-    fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>) -> Option<Point> {
-        let char_point = Game::get_player_point();
-        let last_char_point = Game::get_last_player_point();
+    fn update(&mut self, position: Point, map_component: &mut Box<dyn MapComponent>, player: &Player) -> Option<Point> {
+        let char_point = player.get_position();
+        let last_char_point = player.get_last_position();
 
         if DEBUG_AI { self.show_ai(map_component); }
 
         if char_point != last_char_point || self.path.is_empty() {
-            let path_opt = find_astar_path(map_component, position, char_point);
+            let path_opt = find_astar_path(map_component, position, *char_point);
 
             if let Some(path) = path_opt {
                 self.path = path;
