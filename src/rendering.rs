@@ -1,7 +1,7 @@
 use crate::game::Game;
 use crate::map::{MapComponent, Map};
 use crate::util::{Point, Bound};
-use crate::game::{MAP_WIDTH, MAP_HEIGHT, MAP_OFFSET};
+use crate::game::{MAP_WIDTH, MAP_HEIGHT, MAP_OFFSET, SHOW};
 
 use tcod::Color;
 use tcod::input::Key;
@@ -49,7 +49,7 @@ impl TcodRenderingComponent {
     /// The `MapComponent` is needed for the initial calculation of the character's FOV
     pub fn new(bounds: Bound, map_component: &Box<dyn MapComponent>) -> Self {
         let console = Root::initializer()
-            .size(bounds.max.x, bounds.max.y)
+            .size(bounds.max.x - 1, bounds.max.y - 1)
             .title("Monochrome Rogue-like: The Original Masterpiece")
             .fullscreen(false)
             .init();
@@ -104,7 +104,7 @@ impl RenderingComponent for TcodRenderingComponent {
     }
 
     fn render_tile(&mut self, x: i32, y: i32, symbol: char, explored: &mut bool) {
-        if self.fov_map.is_in_fov(x, y) {
+        if self.fov_map.is_in_fov(x, y) || SHOW {
             self.console.put_char(x, y + MAP_OFFSET, symbol, BackgroundFlag::Set);
             *explored = true;
         } else if *explored {
@@ -114,7 +114,7 @@ impl RenderingComponent for TcodRenderingComponent {
     }
 
     fn render_object(&mut self, position: Point, symbol: char) {
-        if self.fov_map.is_in_fov(position.x, position.y) {
+        if self.fov_map.is_in_fov(position.x, position.y) || SHOW{
             self.console.put_char(position.x, position.y + MAP_OFFSET, symbol, BackgroundFlag::Set);
         }
     }

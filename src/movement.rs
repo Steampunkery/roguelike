@@ -31,6 +31,8 @@ pub struct AggroMovementComponent {
     path: Vec<Point>,
 }
 
+pub struct NoMovementComponent;
+
 impl AggroMovementComponent {
     /// Convenience method for creating `AggroMovementComponent`s.
     pub fn new() -> AggroMovementComponent {
@@ -140,5 +142,15 @@ impl MovementComponent for RandomMovementComponent {
         }
 
         Some(offset)
+    }
+}
+
+impl NoMovementComponent {
+    pub fn new() -> NoMovementComponent { NoMovementComponent }
+}
+
+impl MovementComponent for NoMovementComponent {
+    fn update(&mut self, _position: Point, _map_component: &mut Box<dyn MapComponent>) -> Option<Point> {
+        None
     }
 }

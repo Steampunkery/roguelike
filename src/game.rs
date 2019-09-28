@@ -16,9 +16,11 @@ static mut PLAYER_POS: Point = Point { x: 0, y: 0 };
 /// The y offset of the map from the top
 pub const MAP_OFFSET: i32 = 5; // 1 line for messages, one for padding
 /// The width of the map display area
-pub const MAP_WIDTH: i32 = 80;
+pub const MAP_WIDTH: i32 = 79;
 /// The height of the map display area
-pub const MAP_HEIGHT: i32 = 50;
+pub const MAP_HEIGHT: i32 = 49;
+
+pub const SHOW: bool = true;
 
 /// Game struct containing all the information about the current game state
 pub struct Game<'a> {

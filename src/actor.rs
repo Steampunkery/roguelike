@@ -2,6 +2,7 @@ use crate::map::MapComponent;
 use crate::util::{Point, Bound};
 use crate::rendering::RenderingComponent;
 use crate::movement::{AggroMovementComponent, RandomMovementComponent, MovementComponent};
+use crate::movement::NoMovementComponent;
 
 /// Struct representing both passive and aggressive mobs
 pub struct Actor {
@@ -54,7 +55,7 @@ impl Actor {
 
     /// Creates an `Actor` with traits of a kobold
     pub fn kobold(x: i32, y: i32) -> Actor {
-        let mc: Box<AggroMovementComponent> = box AggroMovementComponent::new();
+        let mc: Box<NoMovementComponent> = box NoMovementComponent::new();
         Actor::new(x, y, 12, 'k', mc, true)
     }
 }

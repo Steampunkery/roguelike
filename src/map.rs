@@ -1,6 +1,7 @@
 use crate::util::Point;
 use crate::util::Bound;
 use crate::rendering::RenderingComponent;
+use crate::game::MAP_OFFSET;
 
 use rand::Rng;
 use rand_isaac::IsaacRng;
@@ -201,6 +202,27 @@ impl DungeonMapComponent {
                 rooms.push(new_room);
             }
         }
+
+        DungeonMapComponent {
+            rooms,
+            map,
+            player_start,
+            bounds
+        }
+    }
+
+    pub fn new_empty(width: i32, height: i32, _random: &mut IsaacRng) -> DungeonMapComponent {
+        let mut map = vec![vec![Tile::wall(); height as usize]; width as usize];
+        let mut rooms = vec![];
+
+        let rect = Rect::new(0, 0, width - 2, height - 2);
+        let zero_point = Point { x: 0, y: 0 + MAP_OFFSET };
+
+        Self::create_room(rect, &mut map);
+        rooms.push(rect);
+
+        let player_start = Point { x: (width-2)/2, y: (height-2)/2 };
+        let bounds = Bound { min: zero_point, max: Point {x: width, y: height} };
 
         DungeonMapComponent {
             rooms,
