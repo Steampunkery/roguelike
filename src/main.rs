@@ -1,6 +1,6 @@
 #![feature(box_syntax)]
 use roguelike::game::Game;
-use roguelike::actor::Actor;
+use roguelike::actor::Entity;
 
 use std::fs;
 use std::path::PathBuf;
@@ -30,22 +30,16 @@ fn main() {
             break Exit::Die
         }
 
-        // wait for user input
         let keypress = game.wait_for_keypress();
 
-        // update game state
         match keypress.code {
             KeyCode::Escape => if keypress.shift { break Exit::Save } else { break Exit::Die }
             _ => {}
         }
 
+        // Being the update loop sequence, which contains multiple sub-loops
         game.update();
 
-        if !game.did_take_turn {
-            continue;
-        }
-
-        // render
         game.render();
     };
 
@@ -74,7 +68,7 @@ fn spawn_monsters(game: &mut Game) {
         let rand_point = room.rand_point(&mut game.random);
 
         // Spawn a monster there
-        game.level.mobs.push(Actor::kobold(rand_point.x, rand_point.y));
+        game.level.entities.push(Some(Entity::kobold(rand_point.x, rand_point.y)));
     }
 }
 
