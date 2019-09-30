@@ -1,8 +1,10 @@
 use crate::actor::Actor;
-use crate::map::MapComponent;
+use crate::level::Level;
+use crate::util::Point;
+use crate::action::Direction::NoDir;
 
 pub trait Action {
-    fn perform(&self, map_component: &mut Box<dyn MapComponent>) -> bool;
+    fn perform(&self, level: &mut Level) -> bool;
 }
 
 pub enum Direction {
@@ -14,36 +16,50 @@ pub enum Direction {
     NW,
     SE,
     SW,
+    NoDir,
 }
 
-pub struct WalkAction<'b> {
+pub struct WalkAction {
     pub direction: Direction,
-    pub actor: &'b mut Actor,
+    pub target: usize,
+    pub offset: Option<Point>,
+    pub point: Option<Point>,
 }
 
-impl<'b> WalkAction<'b> {
-    pub fn new(direction: Direction, actor: &'b mut Actor) -> WalkAction { WalkAction { direction, actor } }
+impl WalkAction {
+    pub fn new(direction: Direction, target: usize) -> WalkAction { WalkAction { direction, target, offset: None, point: None } }
+    pub fn from_offset(offset: Point, target: usize) -> WalkAction { WalkAction { direction: NoDir, target, offset: Some(offset), point: None } }
+    pub fn from_point(point: Point, target: usize) -> WalkAction { WalkAction { direction: NoDir, target, offset: None, point: Some(point) } }
 }
 
-impl<'b> Action for WalkAction<'b> {
-    fn perform(&self, map_component: &mut Box<dyn MapComponent>) -> bool {
+impl Action for WalkAction {
+    fn perform(&self, level: &mut Level) -> bool {
         use crate::action::Direction::*;
+        let actor = &mut level.entities[self.target];
 
-        let position = self.actor.get_position().clone();
-        let new_position = match self.direction {
-            N => position.offset_y(-1),
-            S => position.offset_y(1),
-            W => position.offset_x(-1),
-            E => position.offset_x(1),
-            NW => position.offset(-1, -1),
-            NE => position.offset(1, -1),
-            SW => position.offset(-1, 1),
-            SE => position.offset(1, 1),
+        let position = actor.as_ref().unwrap().get_position();
+
+        let new_position = if let Some(offset) = self.offset {
+            position.offset(offset.x, offset.y)
+        } else if let Some(point) = self.point {
+            point
+        } else {
+            match self.direction {
+                N => position.offset_y(-1),
+                S => position.offset_y(1),
+                W => position.offset_x(-1),
+                E => position.offset_x(1),
+                NW => position.offset(-1, -1),
+                NE => position.offset(1, -1),
+                SW => position.offset(-1, 1),
+                SE => position.offset(1, 1),
+                NoDir => position,
+            }
         };
 
 
-        if !map_component.is_blocked(position.x, position.y) {
-            self.actor.set_position(new_position);
+        if !level.map_component.is_blocked(position.x, position.y) {
+            actor.as_mut().unwrap().set_position(new_position);
             return true;
         }
 
@@ -51,10 +67,16 @@ impl<'b> Action for WalkAction<'b> {
     }
 }
 
-pub struct WaitAction;
+pub struct WaitAction {
+    pub target: usize
+}
 
 impl Action for WaitAction {
-    fn perform(&self, _m: &mut Box<dyn MapComponent>) -> bool {
+    fn perform(&self, l: &mut Level) -> bool {
+        let me = &mut l.entities[self.target];
+
+        let position = me.as_mut().unwrap().get_position();
+        me.as_mut().unwrap().set_position(position);
         true
     }
 }

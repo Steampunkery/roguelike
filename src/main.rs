@@ -1,6 +1,6 @@
 #![feature(box_syntax)]
 use roguelike::game::Game;
-use roguelike::actor::Mob;
+use roguelike::actor::Entity;
 
 use std::fs;
 use std::path::PathBuf;
@@ -68,7 +68,7 @@ fn spawn_monsters(game: &mut Game) {
         let rand_point = room.rand_point(&mut game.random);
 
         // Spawn a monster there
-        game.level.mobs.push(Mob::kobold(rand_point.x, rand_point.y));
+        game.level.entities.push(Some(Entity::kobold(rand_point.x, rand_point.y)));
     }
 }
 

@@ -1,4 +1,3 @@
-use crate::player::Player;
 use crate::map::{MapComponent, Map};
 use crate::util::{Point, Bound};
 use crate::game::{MAP_WIDTH, MAP_HEIGHT, MAP_OFFSET, SHOW};
@@ -8,6 +7,7 @@ use tcod::Color;
 use tcod::input::Key;
 use tcod::map::{Map as FovMap, FovAlgorithm};
 use tcod::console::{Root, BackgroundFlag, Console};
+use crate::actor::Entity;
 
 /// The distance of the character's FOV
 const TORCH_RADIUS: i32 = 10;
@@ -22,7 +22,7 @@ pub trait RenderingComponent {
     /// Hook method to be executed before each frame
     fn before_render_new_frame(&mut self);
     /// Renders every explored tile in a `Map`
-    fn render_map(&mut self, map: &mut Map, player: &Player);
+    fn render_map(&mut self, map: &mut Map, player: &Entity);
     /// Renders a specific explored tile
     fn render_tile(&mut self, x: i32, y: i32, symbol: char, explored: &mut bool);
     /// Renders a single object
@@ -77,11 +77,11 @@ impl TcodRenderingComponent {
 impl RenderingComponent for TcodRenderingComponent {
     fn before_render_new_frame(&mut self) { self.console.clear(); }
 
-    fn render_map(&mut self, map: &mut Map, player: &Player) {
+    fn render_map(&mut self, map: &mut Map, player: &Entity) {
         // Recompute the FOV before we render the map
-        let char_point = player.get_position();
-        if char_point != player.get_last_position() {
-            self.fov_map.compute_fov(char_point.x, char_point.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
+        let player_pos = player.get_position();
+        if player_pos != player.get_last_position() {
+            self.fov_map.compute_fov(player_pos.x, player_pos.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
         }
 
         for x in 0..map.len() - 1 {

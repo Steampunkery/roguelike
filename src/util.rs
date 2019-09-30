@@ -111,13 +111,6 @@ impl Point {
     }
 }
 
-/// Deprecated. An enum for expressing whether
-/// a bound contains a point.
-pub enum Contains {
-    DoesContain,
-    DoesNotContain
-}
-
 /// A rectangle representing a boundary.
 #[derive(Copy, Clone)]
 pub struct Bound {
@@ -127,18 +120,16 @@ pub struct Bound {
 
 impl Bound {
     /// Check whether the current bound contains a given point.
-    pub fn contains(&self, point: Point) -> Contains {
-        use self::Contains::*;
-
+    pub fn contains(&self, point: Point) -> bool {
         if 
             point.x >= self.min.x &&
             point.x <= self.max.x &&
             point.y >= self.min.y &&
             point.y <= self.max.y
         {
-            DoesContain
+            true
         } else {
-            DoesNotContain
+            false
         }
     }
 }
