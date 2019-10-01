@@ -1,13 +1,14 @@
 [package]
 name = "roguelike"
-version = "0.0.5"
-authors = ["jmcfarland"]
+version = "0.1.0"
+authors = ["okeeffet"]
 edition = "2018"
 
 [dependencies]
 tcod = "*"
-rand = "*"
+rand_core = "*"
 rand_isaac = "*"
+rand = "*"
 pathfinding = "*"
 hashbrown = "*"
 dirs = "*"

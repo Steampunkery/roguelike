@@ -3,13 +3,11 @@ use crate::util::{Point, Bound};
 use crate::rendering::{RenderingComponent, TcodRenderingComponent};
 
 use tcod::input::Key;
-
-use rand::RngCore;
-use rand::SeedableRng;
 use rand_isaac::IsaacRng;
+use rand_core::{SeedableRng, RngCore};
 
 /// The y offset of the map from the top
-pub const MAP_OFFSET: i32 = 5; // 1 line for messages, one for padding
+pub const MAP_OFFSET: i32 = 2; // 1 line for messages, one for padding
 /// The width of the map display area
 pub const MAP_WIDTH: i32 = 79;
 /// The height of the map display area
@@ -27,10 +25,6 @@ pub struct Game {
     pub rendering_component: Box<dyn RenderingComponent + 'static>,
     /// A `Level` struct containing all the information on the current level
     pub level: Level,
-    /// A vector of messages to show to the player
-    pub messages: Vec<String>,
-    /// Where we are in the massages vector
-    pub message_seek: usize,
     /// The game's RNG
     pub random: IsaacRng,
     /// The game's RNG seed
@@ -57,8 +51,6 @@ impl Game {
             exit: false,
             window_bounds: bounds,
             rendering_component: rc,
-            messages: vec!["Welcome to MR: TOM".to_string()],
-            message_seek: 0,
             random: isaac,
         }
     }
@@ -93,15 +85,10 @@ impl Game {
     }
 
     /// Calls the update methods of ALL objects in the domain of the game. Think player, items, mobs, etc.
-    pub fn update(&mut self) {
-        self.level.update();
-    }
+    pub fn update(&mut self) { self.level.update() }
 
     pub fn refresh_messages(&mut self) {
-        self.message_seek = if self.messages.len() < 5 { 0 } else { self.messages.len() % 5 };
-        for (i, message) in self.messages.iter().skip(self.message_seek).enumerate() {
-            self.rendering_component.write_message(message, 0, (i as i32 - 4).abs());
-        }
+        self.rendering_component.write_message(&self.level.messages[0], 0, 0);
     }
 
     /// Receives the keypresses in the game loop

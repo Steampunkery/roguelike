@@ -1,17 +1,27 @@
 #![feature(box_syntax)]
-use roguelike::game::Game;
-use roguelike::actor::Entity;
+pub mod util;
+pub mod game;
+pub mod rendering;
+pub mod brain;
+pub mod actor;
+pub mod map;
+pub mod ai;
+pub mod level;
+pub mod item;
+pub mod action;
+pub mod state;
+
+use game::Game;
 
 use std::fs;
 use std::path::PathBuf;
 use std::io::{ErrorKind, Error as IOE};
 
-use rand::Rng;
 use dirs::home_dir;
-use tcod::input::KeyCode;
+use crate::state::{PlayState, State};
 
-#[derive(PartialEq)]
-enum Exit {
+#[derive(PartialEq, Copy, Clone)]
+pub enum Exit {
     Save,
     Die
 }
@@ -19,33 +29,28 @@ enum Exit {
 fn main() {
     let seed = try_load_game();
 
-    let mut game = Game::new(seed);
+    let game = Game::new(seed);
+    let mut state = box PlayState::new(game) as Box<dyn State>;
 
-    // A hack. Fix later
-    spawn_monsters(&mut game);
-
-    game.render();
+    state.render();
     let save = loop {
-        if game.rendering_component.get_root_console().window_closed() {
+        if state.get_game().rendering_component.get_root_console().window_closed() {
             break Exit::Die
         }
 
-        let keypress = game.wait_for_keypress();
-
-        match keypress.code {
-            KeyCode::Escape => if keypress.shift { break Exit::Save } else { break Exit::Die }
-            _ => {}
-        }
-
         // Being the update loop sequence, which contains multiple sub-loops
-        game.update();
+        state.update();
 
-        game.render();
+        state.render();
+
+        if let Some(exit) = state.maybe_exit_game() {
+            break exit
+        }
     };
 
     // If the player wants to save, attempt to write game info
     if save == Exit::Save {
-        match save_game(game.seed) {
+        match save_game(state.get_game().seed) {
             Err(e) => eprintln!("Could not save: {}", e.to_string()),
             _ => ()
         }
@@ -54,21 +59,7 @@ fn main() {
 
     // Else, scrub the save file to prevent game replay
     match fs::File::create([home_dir().unwrap().to_str().unwrap(), ".config", "mrtom", "save.dat"].iter().collect::<PathBuf>()) {
-        _ => () // To prevent warnings (They're annoying)
-    }
-}
-
-fn spawn_monsters(game: &mut Game) {
-    for _ in 0..3 {
-        // Get a random room
-        let room_num = game.random.gen_range(0, game.level.map_component.get_rooms().len());
-        let room = game.level.map_component.get_rooms()[room_num];
-
-        // Pick random coordinates in that room
-        let rand_point = room.rand_point(&mut game.random);
-
-        // Spawn a monster there
-        game.level.entities.push(Some(Entity::kobold(rand_point.x, rand_point.y)));
+        _ => () // To prevent warnings (they're annoying)
     }
 }
 

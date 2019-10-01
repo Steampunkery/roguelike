@@ -1,10 +1,10 @@
-use crate::game::Game;
 use crate::actor::Entity;
 use crate::item::ItemsMap;
 use crate::rendering::RenderingComponent;
 use crate::map::{DungeonMapComponent, MapComponent};
 
 use rand_isaac::IsaacRng;
+use rand::Rng;
 
 use tcod::input::Key;
 
@@ -17,6 +17,10 @@ pub struct Level {
     pub items: ItemsMap,
     /// The actual `MapComponent` that hold the meat of the level data
     pub map_component: Box<dyn MapComponent + 'static>,
+    /// A vector of messages to show to the player
+    pub messages: Vec<String>,
+    /// Where we are in the massages vector
+    pub message_seek: usize,
     pub input: Option<Key>,
     pub current_actor: usize
 }
@@ -27,16 +31,31 @@ impl Level {
         let mc: Box<dyn MapComponent> = box DungeonMapComponent::new_empty(width, height, random);
         let items = crate::item::place_items(mc.get_rooms(), random);
 
-        let player = if let Some(p) = p {
+        let mut entities = vec![];
+        entities.push(if p.is_some() {
             p
         } else {
-            Entity::player(mc.get_player_start())
-        };
+            Some(Entity::player(mc.get_player_start()))
+        });
+
+        for _ in 0..3 {
+            // Get a random room
+            let room_num = random.gen_range(0, mc.get_rooms().len());
+            let room = mc.get_rooms()[room_num];
+
+            // Pick random coordinates in that room
+            let rand_point = room.rand_point(random);
+
+            // Spawn a monster there
+            entities.push(Some(Entity::kobold(rand_point.x, rand_point.y)));
+        }
 
         Level {
             items,
-            entities: vec![Some(player)],
+            entities,
             map_component: mc,
+            messages: vec!["Welcome to MR: TOM".to_string()],
+            message_seek: 0,
             input: None,
             current_actor: 0
         }
@@ -79,36 +98,5 @@ impl Level {
         }
 
         self.current_actor = 0;
-    }
-}
-
-pub trait State {
-    fn new() -> Self;
-    fn should_update_state(&self) -> bool;
-
-    fn enter(&self) {}
-    fn exit(&self) {}
-
-    fn update(&mut self, game: &mut Game);
-    fn render(&mut self, game: &mut Game) {
-        game.rendering_component.before_render_new_frame();
-        game.rendering_component.after_render_new_frame();
-    }
-}
-
-pub struct PlayState;
-
-impl State for PlayState {
-    fn new() -> PlayState {
-        PlayState
-    }
-
-    fn should_update_state(&self) -> bool {
-        true
-    }
-
-    fn update(&mut self, _game: &mut Game) {
-//        game.player.update(&mut game.level);
-//        Game::set_player_point(game.player.get_position());
     }
 }
