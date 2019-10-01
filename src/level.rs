@@ -20,7 +20,7 @@ pub struct Level {
     /// A vector of messages to show to the player
     pub messages: Vec<String>,
     /// Where we are in the massages vector
-    pub message_seek: usize,
+    pub message_seek: i32,
     pub input: Option<Key>,
     pub current_actor: usize
 }
@@ -55,7 +55,7 @@ impl Level {
             entities,
             map_component: mc,
             messages: vec!["Welcome to MR: TOM".to_string()],
-            message_seek: 0,
+            message_seek: -1,
             input: None,
             current_actor: 0
         }

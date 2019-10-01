@@ -88,7 +88,10 @@ impl Game {
     pub fn update(&mut self) { self.level.update() }
 
     pub fn refresh_messages(&mut self) {
-        self.rendering_component.write_message(&self.level.messages[0], 0, 0);
+        if self.level.messages.len() as i32 > self.level.message_seek + 1 {
+            self.level.message_seek += 1;
+            self.rendering_component.write_message(&self.level.messages[self.level.message_seek as usize], 0, 0);
+        }
     }
 
     /// Receives the keypresses in the game loop
