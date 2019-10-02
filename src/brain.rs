@@ -1,6 +1,6 @@
 use crate::level::Level;
 
-use crate::ai::{DEBUG_AI, find_astar_path};
+use crate::ai::{SHOW_AI, find_astar_path};
 
 use crate::util::{Point, Bound};
 
@@ -41,7 +41,7 @@ impl AggroBrainComponent {
     }
 
     fn show_ai(&mut self, map: &mut Box<dyn MapComponent>) {
-        if DEBUG_AI {
+        if SHOW_AI {
             if !self.path.is_empty() {
                 for point in &self.path {
                     map.get_map_mut()[point.x as usize][point.y as usize].color_override = Some(Color { r: 255, g: 0, b: 0 });

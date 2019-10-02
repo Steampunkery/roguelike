@@ -1,6 +1,6 @@
 use crate::map::{MapComponent, Map};
 use crate::util::{Point, Bound};
-use crate::game::{MAP_WIDTH, MAP_HEIGHT, MAP_OFFSET, SHOW};
+use crate::game::{MAP_WIDTH, MAP_HEIGHT, MAP_OFFSET, SHOW_MAP};
 use crate::actor::Actor;
 
 use tcod::Color;
@@ -45,6 +45,7 @@ pub struct TcodRenderingComponent {
     /// The map corresponding to the character's FOV
     pub fov_map: FovMap,
     prev_message: (String, i32),
+    new_message: bool,
 }
 
 impl TcodRenderingComponent {
@@ -73,6 +74,7 @@ impl TcodRenderingComponent {
             console,
             fov_map,
             prev_message: (String::new(), 0),
+            new_message: false,
         }
     }
 }
@@ -80,6 +82,7 @@ impl TcodRenderingComponent {
 impl RenderingComponent for TcodRenderingComponent {
     fn before_render_new_frame(&mut self) {
         self.console.clear();
+        self.new_message = false;
     }
 
     fn render_map(&mut self, map: &mut Map, player: &Entity) {
@@ -89,8 +92,8 @@ impl RenderingComponent for TcodRenderingComponent {
             self.fov_map.compute_fov(player_pos.x, player_pos.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
         }
 
-        for x in 0..map.len() - 1 {
-            for y in 0..map[x].len() - 1 {
+        for x in 0..map.len() {
+            for y in 0..map[x].len() {
                 let wall = map[x][y].block_sight;
                 let color_override = map[x][y].color_override;
 
@@ -109,7 +112,7 @@ impl RenderingComponent for TcodRenderingComponent {
     }
 
     fn render_tile(&mut self, x: i32, y: i32, symbol: char, explored: &mut bool) {
-        if self.fov_map.is_in_fov(x, y) || SHOW {
+        if self.fov_map.is_in_fov(x, y) || SHOW_MAP {
             self.console.put_char(x, y + MAP_OFFSET, symbol, BackgroundFlag::Set);
             *explored = true;
         } else if *explored {
@@ -119,7 +122,7 @@ impl RenderingComponent for TcodRenderingComponent {
     }
 
     fn render_object(&mut self, position: Point, symbol: char) {
-        if self.fov_map.is_in_fov(position.x, position.y) || SHOW{
+        if self.fov_map.is_in_fov(position.x, position.y) || SHOW_MAP {
             self.console.put_char(position.x, position.y + MAP_OFFSET, symbol, BackgroundFlag::Set);
         }
     }
@@ -135,6 +138,7 @@ impl RenderingComponent for TcodRenderingComponent {
                 self.console.print((self.prev_message.0).len() as i32 + 1, 0, format!("(x{})", self.prev_message.1));
             }
         }
+        self.new_message = true;
     }
 
     fn write_message_color(&mut self, message: &String, x: i32, y: i32, color: Color) {
@@ -145,6 +149,9 @@ impl RenderingComponent for TcodRenderingComponent {
     }
 
     fn after_render_new_frame(&mut self) {
+        if !self.new_message {
+            self.write_message_color(&self.prev_message.0.clone(), 0, 0, Color { r: 105, g: 105, b: 105 });
+        }
         self.console.flush();
     }
 

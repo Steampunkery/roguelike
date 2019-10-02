@@ -13,7 +13,7 @@ pub const MAP_WIDTH: i32 = 79;
 /// The height of the map display area
 pub const MAP_HEIGHT: i32 = 49;
 
-pub const SHOW: bool = true;
+pub const SHOW_MAP: bool = true;
 
 /// Game struct containing all the information about the current game state
 pub struct Game {

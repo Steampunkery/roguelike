@@ -95,16 +95,12 @@ impl Point {
     pub fn successors(&self, map: &Box<dyn MapComponent>) -> Vec<(Point, u32)> {
         let (x, y) = (self.x, self.y);
         let mut successors = vec![];
-        for (index, i) in [(0, 1), (0, -1), (1, 0), (-1, 0), (-1, -1), (1, 1), (1, -1), (-1, 1)].iter().enumerate() {
+        for i in [(0, 1), (0, -1), (1, 0), (-1, 0), (-1, -1), (1, 1), (1, -1), (-1, 1)].iter() {
             if !map.is_blocked(x + i.0, y + i.1) {
                 let p = Point { x: x + i.0, y: y + i.1 };
 
                 // prefer orthogonal movement to diagonal movement
-                if index < 4 {
-                    successors.push((p, 0));
-                } else {
-                    successors.push((p, 1));
-                }
+                successors.push((p, 1));
             }
         }
         successors

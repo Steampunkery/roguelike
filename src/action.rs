@@ -58,7 +58,7 @@ impl Action for WalkAction {
         };
 
 
-        if !level.map_component.is_blocked(position.x, position.y) {
+        if !level.map_component.is_blocked(new_position.x, new_position.y) {
             actor.as_mut().unwrap().set_position(new_position);
             return true;
         }
