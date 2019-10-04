@@ -27,9 +27,12 @@ pub trait RenderingComponent {
     fn render_tile(&mut self, x: i32, y: i32, symbol: char, explored: &mut bool);
     /// Renders a single object
     fn render_object(&mut self, point: Point, symbol: char);
-    /// Writes a given message to a point in the console
-    fn write_message(&mut self, message: &String, x: i32, y: i32);
-    fn write_message_color(&mut self, message: &String, x: i32, y: i32, color: Color);
+    /// Writes a game message
+    fn push_message(&mut self, message: &String, x: i32, y: i32);
+    /// Writes a game message in color
+    fn push_message_color(&mut self, message: &String, x: i32, y: i32, color: Color);
+    /// Prints a message to some point
+    fn print(&mut self, message: &String, x: i32, y: i32);
     /// Hook method to be executed after each frame is done being rendered completely
     fn after_render_new_frame(&mut self);
     /// Wait for keypresses in the console
@@ -127,12 +130,12 @@ impl RenderingComponent for TcodRenderingComponent {
         }
     }
 
-    fn write_message(&mut self, message: &String, x: i32, y: i32) {
+    fn push_message(&mut self, message: &String, x: i32, y: i32) {
         if *message != self.prev_message.0 {
             self.console.print(x, y, message);
             self.prev_message = (message.clone(), 1);
         } else {
-            self.write_message_color(&(self.prev_message.0.clone()), 0, 0, Color {r: 105, g: 105, b: 105});
+            self.push_message_color(&(self.prev_message.0.clone()), 0, 0, Color {r: 105, g: 105, b: 105});
             self.prev_message.1 += 1;
             if self.prev_message.1 > 1 {
                 self.console.print((self.prev_message.0).len() as i32 + 1, 0, format!("(x{})", self.prev_message.1));
@@ -141,7 +144,7 @@ impl RenderingComponent for TcodRenderingComponent {
         self.new_message = true;
     }
 
-    fn write_message_color(&mut self, message: &String, x: i32, y: i32, color: Color) {
+    fn push_message_color(&mut self, message: &String, x: i32, y: i32, color: Color) {
         for (i, s) in message.chars().enumerate() {
             self.console.put_char(x + i as i32, y, s, BackgroundFlag::None);
             self.console.set_char_foreground(x + i as i32, y, color);
@@ -150,9 +153,13 @@ impl RenderingComponent for TcodRenderingComponent {
 
     fn after_render_new_frame(&mut self) {
         if !self.new_message {
-            self.write_message_color(&self.prev_message.0.clone(), 0, 0, Color { r: 105, g: 105, b: 105 });
+            self.push_message_color(&self.prev_message.0.clone(), 0, 0, Color { r: 105, g: 105, b: 105 });
         }
         self.console.flush();
+    }
+
+    fn print(&mut self, message: &String, x: i32, y: i32) {
+        self.console.print(x, y, message);
     }
 
     fn wait_for_keypress(&mut self) -> Key {

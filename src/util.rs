@@ -92,15 +92,17 @@ impl Point {
 
     /// Determine which points adjoining the current point can be used
     /// as a successor for the current point in an A* algorithm.
-    pub fn successors(&self, map: &Box<dyn MapComponent>) -> Vec<(Point, u32)> {
+    pub fn successors(&self, map: &Box<dyn MapComponent>, goal: &Point) -> Vec<(Point, u32)> {
         let (x, y) = (self.x, self.y);
         let mut successors = vec![];
-        for i in [(0, 1), (0, -1), (1, 0), (-1, 0), (-1, -1), (1, 1), (1, -1), (-1, 1)].iter() {
-            if !map.is_blocked(x + i.0, y + i.1) {
-                let p = Point { x: x + i.0, y: y + i.1 };
-
-                // prefer orthogonal movement to diagonal movement
-                successors.push((p, 1));
+        for (idx, i) in [(0, 1), (0, -1), (1, 0), (-1, 0), (-1, -1), (1, 1), (1, -1), (-1, 1)].iter().enumerate() {
+            let p = Point { x: x + i.0, y: y + i.1 };
+            if (!map.is_blocked(x + i.0, y + i.1) && !map.is_occupied(x + i.0, y + i.1)) || p == *goal {
+                if idx > 3 {
+                    successors.push((p, 14));
+                } else {
+                    successors.push((p, 10));
+                }
             }
         }
         successors

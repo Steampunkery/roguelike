@@ -100,6 +100,8 @@ pub trait MapComponent {
     fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>, player: &Entity);
     /// Whether the supplied position has the `blocked` flag set.
     fn is_blocked(&self, x: i32, y: i32) -> bool;
+    /// Checks if a position is occupied by and entity
+    fn is_occupied(&self, x: i32, y: i32) -> bool;
     /// Gets the bounds (size) of the map
     fn get_bounds(&self) -> Bound;
 }
@@ -143,8 +145,11 @@ impl MapComponent for DungeonMapComponent {
     }
 
     fn is_blocked(&self, x: i32, y: i32) -> bool {
-        self.contains(x, y) &&
-            (self.map[x as usize][y as usize].blocked || self.map[x as usize][y as usize].occupied)
+        self.contains(x, y) && self.map[x as usize][y as usize].blocked
+    }
+
+    fn is_occupied(&self, x: i32, y: i32) -> bool {
+        self.contains(x, y) && self.map[x as usize][y as usize].occupied
     }
 
     fn get_bounds(&self) -> Bound {

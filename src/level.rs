@@ -1,4 +1,4 @@
-use crate::actor::Entity;
+use crate::actor::{Actor, Entity};
 use crate::item::ItemsMap;
 use crate::rendering::RenderingComponent;
 use crate::map::{DungeonMapComponent, MapComponent};
@@ -28,15 +28,20 @@ pub struct Level {
 impl Level {
     /// Creates a basic level with a default dungeon map and some random items
     pub fn new(width: i32, height: i32, random: &mut IsaacRng, p: Option<Entity>) -> Level {
-        let mc: Box<dyn MapComponent> = box DungeonMapComponent::new_empty(width, height, random);
+        let mut mc: Box<dyn MapComponent> = box DungeonMapComponent::new_empty(width, height, random);
         let items = crate::item::place_items(mc.get_rooms(), random);
+        let player_pos = mc.get_player_start();
 
         let mut entities = vec![];
         entities.push(if p.is_some() {
-            p
+            let mut player = p.unwrap();
+            player.set_position(player_pos);
+            Some(player)
         } else {
-            Some(Entity::player(mc.get_player_start()))
+            Some(Entity::player(player_pos))
         });
+
+        mc.get_map_mut()[player_pos.x as usize][player_pos.y as usize].occupied = true;
 
         for _ in 0..3 {
             // Get a random room
@@ -79,22 +84,24 @@ impl Level {
     pub fn update(&mut self) {
         'outer: while self.current_actor < self.entities.len() {
             let mut entity = self.entities[self.current_actor].take().unwrap();
-            let action = entity.get_action(self);
+            let mut action = entity.get_action(self);
             self.entities[self.current_actor] = Some(entity);
+            println!("{}", self.current_actor);
 
-            'inner: loop {
-                if let Some(action) = &action {
-                    let result = action.perform(self);
-                    if result {
-                        self.current_actor += 1;
-                        break 'inner
-                    } else {
-                        break 'outer
-                    }
-                } else {
-                    return
+            if action.is_some() {
+                'inner: loop {
+                    let act = action.unwrap();
+                    let result = act.perform(self);
+                    if !result.success { return }
+                    if result.alternate.is_none() { break 'inner }
+                    action = result.alternate;
                 }
+                self.current_actor += 1;
+            } else {
+                println!("SHOULDN'T HAPPEN");
+                return
             }
+
         }
 
         self.current_actor = 0;

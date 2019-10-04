@@ -54,28 +54,22 @@ impl AggroBrainComponent {
 impl BrainComponent for AggroBrainComponent {
     fn get_action(&mut self, entity: &mut Entity, level: &mut Level) -> Option<Box<dyn Action>> {
         let player_pos = level.entities[0].as_ref().unwrap().get_position();
-        let last_player_pos = level.entities[0].as_ref().unwrap().get_last_position();
         let target = level.current_actor;
 
-        if player_pos != last_player_pos || self.path.is_empty() {
-            let path_opt = find_astar_path(&level.map_component, entity.get_position(), player_pos);
+        let path_opt = find_astar_path(&level.map_component, entity.get_position(), player_pos);
 
-            if let Some(path) = path_opt {
-                self.path = path;
+        if let Some(path) = path_opt {
+            self.path = path;
 
-                // 0th element is the current position
-                self.path.remove(0);
+            // 0th element is the current position
+            self.path.remove(0);
 
-                return if !self.path.is_empty() {
-                    self.show_ai(&mut level.map_component);
-                    Some(box WalkAction::from_point(self.path.remove(0), target))
-                } else {
-                    Some(box WaitAction { target })
-                }
+            return if !self.path.is_empty() {
+                self.show_ai(&mut level.map_component);
+                Some(box WalkAction::from_point(self.path.remove(0), target))
+            } else {
+                Some(box WaitAction { target })
             }
-        } else if player_pos == last_player_pos && !self.path.is_empty() {
-            self.show_ai(&mut level.map_component);
-            return Some(box WalkAction::from_point(self.path.remove(0), target));
         }
 
         Some(box WaitAction { target })

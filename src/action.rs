@@ -4,7 +4,12 @@ use crate::util::Point;
 use crate::action::Direction::NoDir;
 
 pub trait Action {
-    fn perform(&self, level: &mut Level) -> bool;
+    fn perform(&self, level: &mut Level) -> ActionResult;
+}
+
+pub struct ActionResult {
+    pub success: bool,
+    pub alternate: Option<Box<dyn Action + 'static>>,
 }
 
 pub enum Direction {
@@ -33,7 +38,7 @@ impl WalkAction {
 }
 
 impl Action for WalkAction {
-    fn perform(&self, level: &mut Level) -> bool {
+    fn perform(&self, level: &mut Level) -> ActionResult {
         use crate::action::Direction::*;
         let actor = &mut level.entities[self.target];
 
@@ -58,12 +63,16 @@ impl Action for WalkAction {
         };
 
 
-        if !level.map_component.is_blocked(new_position.x, new_position.y) {
+        if !level.map_component.is_blocked(new_position.x, new_position.y) && !level.map_component.is_occupied(new_position.x, new_position.y){
+
             actor.as_mut().unwrap().set_position(new_position);
-            return true;
+            let map = level.map_component.get_map_mut();
+            map[new_position.x as usize][new_position.y as usize].occupied = true;
+            map[position.x as usize][position.y as usize].occupied = false;
+            return ActionResult { success: true, alternate: None }
         }
 
-        false
+        ActionResult { success: true, alternate: Some(box WaitAction { target: self.target }) }
     }
 }
 
@@ -72,11 +81,11 @@ pub struct WaitAction {
 }
 
 impl Action for WaitAction {
-    fn perform(&self, l: &mut Level) -> bool {
+    fn perform(&self, l: &mut Level) -> ActionResult {
         let me = &mut l.entities[self.target];
 
         let position = me.as_mut().unwrap().get_position();
         me.as_mut().unwrap().set_position(position);
-        true
+        ActionResult { success: true, alternate: None }
     }
 }
