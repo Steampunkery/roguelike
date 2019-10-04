@@ -18,10 +18,12 @@ pub struct Level {
     /// The actual `MapComponent` that hold the meat of the level data
     pub map_component: Box<dyn MapComponent + 'static>,
     /// A vector of messages to show to the player
-    pub messages: Vec<String>,
+    pub message_queue: Vec<String>,
     /// Where we are in the massages vector
-    pub message_seek: i32,
+    pub message_cache: Vec<String>,
+    /// Input handed down from the Game
     pub input: Option<Key>,
+    /// The entity who can act at a given moment
     pub current_actor: usize
 }
 
@@ -59,24 +61,10 @@ impl Level {
             items,
             entities,
             map_component: mc,
-            messages: vec!["Welcome to MR: TOM".to_string()],
-            message_seek: -1,
+            message_queue: vec!["Welcome to MR: TOM".to_string()],
+            message_cache: vec![],
             input: None,
             current_actor: 0
-        }
-    }
-
-    /// Calls the render method of the following things in order: Map, Mobs, Items
-    pub fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
-        self.map_component.render(rendering_component, &self.entities[0].as_ref().unwrap());
-
-        for item in self.items.values() {
-            item.render(rendering_component);
-        }
-
-        // reverse to render the player last because it's always 0
-        for i in self.entities.iter().rev() {
-            i.as_ref().unwrap().render(rendering_component);
         }
     }
 
@@ -103,5 +91,23 @@ impl Level {
         }
 
         self.current_actor = 0;
+    }
+
+    /// Calls the render method of the following things in order: Map, Mobs, Items
+    pub fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
+        self.map_component.render(rendering_component, &self.entities[0].as_ref().unwrap());
+
+        for item in self.items.values() {
+            item.render(rendering_component);
+        }
+
+        // reverse to render the player last because it's always 0
+        for i in self.entities.iter().rev() {
+            i.as_ref().unwrap().render(rendering_component);
+        }
+    }
+
+    pub fn game_log(&mut self, message: String) {
+        self.message_queue.push(message);
     }
 }

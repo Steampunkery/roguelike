@@ -29,28 +29,45 @@ pub enum Exit {
 fn main() {
     let seed = try_load_game();
 
-    let game = Game::new(seed);
-    let mut state = box PlayState::new(game) as Box<dyn State>;
+    let mut states: Vec<Box<dyn State>> = vec![];
 
-    state.render();
+    let game = Game::new(seed);
+    let play_state = Box::new(PlayState::new(game));
+
+    states.push(play_state);
+
+    states[0].render();
     let save = loop {
-        if state.get_game().rendering_component.get_root_console().window_closed() {
+        let mut i = states.len() - 1;
+
+        if states[i].get_game().rendering_component.get_root_console().window_closed() {
             break Exit::Die
         }
 
-        // Being the update loop sequence, which contains multiple sub-loops
-        state.update();
+        // Update state
+        if states[i].should_exit() {
+            let game = states.pop().unwrap().exit();
+            i -= 1;
+            states[i].set_game(game);
+        } else {
+            if let Some(new_state) = states[i].maybe_new_state() {
+                states.push(new_state);
+                i += 1;
+            }
+        }
 
-        state.render();
+        states[i].update();
+        states[i].render();
 
-        if let Some(exit) = state.maybe_exit_game() {
+        // Check if the game should exit
+        if let Some(exit) = states[i].maybe_exit_game() {
             break exit
         }
     };
 
     // If the player wants to save, attempt to write game info
     if save == Exit::Save {
-        match save_game(state.get_game().seed) {
+        match save_game(states.last().unwrap().get_game().seed) {
             Err(e) => eprintln!("Could not save: {}", e.to_string()),
             _ => ()
         }

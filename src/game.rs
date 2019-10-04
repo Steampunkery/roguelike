@@ -6,8 +6,6 @@ use tcod::input::Key;
 use rand_isaac::IsaacRng;
 use rand_core::{SeedableRng, RngCore};
 
-use std::str::FromStr;
-
 /// The y offset of the map from the top
 pub const MAP_OFFSET: i32 = 2; // 1 line for messages, one for padding
 /// The width of the map display area
@@ -76,32 +74,10 @@ impl Game {
     }
 
     /// Calls the update methods of all objects in the domain of the game. Think player, items, mobs, etc.
-    pub fn update(&mut self) {
-        if self.level.messages.len() as i32 > self.level.message_seek + 2 {
-            self.level.message_seek += 1;
-            self.rendering_component.push_message(&self.level.messages[self.level.message_seek as usize], 0, 0);
-            self.rendering_component.print(&String::from_str("-- enter for more --").unwrap(), MAP_WIDTH - 20, 0);
-        }
-        self.level.update();
-    }
+    pub fn update(&mut self) { self.level.update(); }
 
     /// Delegates rendering of the map, mobs, and player to the `rendering_component` in the correct order
-    pub fn render(&mut self) {
-        self.rendering_component.before_render_new_frame();
-
-        self.refresh_messages();
-
-        self.level.render(&mut self.rendering_component);
-
-        self.rendering_component.after_render_new_frame();
-    }
-
-    pub fn refresh_messages(&mut self) {
-        if self.level.messages.len() as i32 > self.level.message_seek + 1 {
-            self.level.message_seek += 1;
-            self.rendering_component.push_message(&self.level.messages[self.level.message_seek as usize], 0, 0);
-        }
-    }
+    pub fn render(&mut self) { self.level.render(&mut self.rendering_component) }
 
     /// Receives the keypresses in the game loop
     pub fn wait_for_keypress(&mut self) -> Key {
