@@ -86,7 +86,6 @@ impl Level {
             let mut entity = self.entities[self.current_actor].take().unwrap();
             let mut action = entity.get_action(self);
             self.entities[self.current_actor] = Some(entity);
-            println!("{}", self.current_actor);
 
             if action.is_some() {
                 'inner: loop {
@@ -98,7 +97,6 @@ impl Level {
                 }
                 self.current_actor += 1;
             } else {
-                println!("SHOULDN'T HAPPEN");
                 return
             }
 
