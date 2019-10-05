@@ -74,15 +74,52 @@ impl Game {
     }
 
     /// Calls the update methods of all objects in the domain of the game. Think player, items, mobs, etc.
-    pub fn update(&mut self) { self.level.update(); }
+    pub fn update(&mut self) {
+        'outer: while self.level.current_actor < self.level.entities.len() {
+            let mut entity = self.level.entities[self.level.current_actor].take().unwrap();
+            let mut action = entity.get_action(&mut self.level);
+            self.level.entities[self.level.current_actor] = Some(entity);
+
+            if action.is_some() {
+                'inner: loop {
+                    let act = action.unwrap();
+                    let result = act.perform(&mut self.level);
+                    if !result.success { return }
+                    if result.alternate.is_none() { break 'inner }
+                    action = result.alternate;
+                }
+                self.level.current_actor += 1;
+            } else {
+                return
+            }
+
+        }
+
+        self.level.current_actor = 0;
+    }
 
     /// Delegates rendering of the map, mobs, and player to the `rendering_component` in the correct order
-    pub fn render(&mut self) { self.level.render(&mut self.rendering_component) }
+    pub fn render(&mut self) {
+        self.level.map_component.render(&mut self.rendering_component, &self.level.entities[0].as_ref().unwrap());
+
+        for item in self.level.items.values() {
+            item.render(&mut self.rendering_component);
+        }
+
+        // reverse to render the player last because it's always 0
+        for i in self.level.entities.iter().rev() {
+            i.as_ref().unwrap().render(&mut self.rendering_component);
+        }
+    }
 
     /// Receives the keypresses in the game loop
     pub fn wait_for_keypress(&mut self) -> Key {
         let ks = self.rendering_component.wait_for_keypress();
         self.level.input = Some(ks);
         return ks;
+    }
+
+    pub fn game_log(&mut self, message: String) {
+        self.level.message_queue.push(message);
     }
 }

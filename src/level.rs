@@ -67,47 +67,4 @@ impl Level {
             current_actor: 0
         }
     }
-
-    /// Updates all the living things on the level.
-    pub fn update(&mut self) {
-        'outer: while self.current_actor < self.entities.len() {
-            let mut entity = self.entities[self.current_actor].take().unwrap();
-            let mut action = entity.get_action(self);
-            self.entities[self.current_actor] = Some(entity);
-
-            if action.is_some() {
-                'inner: loop {
-                    let act = action.unwrap();
-                    let result = act.perform(self);
-                    if !result.success { return }
-                    if result.alternate.is_none() { break 'inner }
-                    action = result.alternate;
-                }
-                self.current_actor += 1;
-            } else {
-                return
-            }
-
-        }
-
-        self.current_actor = 0;
-    }
-
-    /// Calls the render method of the following things in order: Map, Mobs, Items
-    pub fn render(&mut self, rendering_component: &mut Box<dyn RenderingComponent>) {
-        self.map_component.render(rendering_component, &self.entities[0].as_ref().unwrap());
-
-        for item in self.items.values() {
-            item.render(rendering_component);
-        }
-
-        // reverse to render the player last because it's always 0
-        for i in self.entities.iter().rev() {
-            i.as_ref().unwrap().render(rendering_component);
-        }
-    }
-
-    pub fn game_log(&mut self, message: String) {
-        self.message_queue.push(message);
-    }
 }

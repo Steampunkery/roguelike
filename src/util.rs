@@ -131,3 +131,12 @@ impl Bound {
         }
     }
 }
+
+pub fn add_punctuation(mut s: String) -> String {
+    if s.ends_with(".") || s.ends_with("!") || s.ends_with("?") {
+        return s;
+    }
+
+    s.push('.');
+    s
+}

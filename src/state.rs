@@ -1,5 +1,6 @@
 use crate::game::{Game, MAP_WIDTH};
 use crate::Exit;
+use crate::util::add_punctuation;
 
 use tcod::input::KeyCode;
 
@@ -95,7 +96,7 @@ impl State for MessageState {
         if !self.game.as_mut().unwrap().level.message_queue.is_empty() {
             let game = self.game.as_mut().unwrap();
 
-            let mut message = game.level.message_queue.remove(0);
+            let mut message = game.level.message_queue.drain(..).map(|s| add_punctuation(s)).collect::<Vec<String>>().join(" ");
             if message.len() > (MAP_WIDTH - 21) as usize {
                 let spaces = message.match_indices(" ").collect::<Vec<_>>();
                 let m_clone = message.clone();
