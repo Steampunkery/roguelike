@@ -43,7 +43,7 @@ impl PlayState {
 
 impl State for PlayState {
     fn maybe_new_state(&mut self) -> Option<Box<dyn State>> {
-        if !self.game.as_ref().unwrap().level.message_queue.is_empty() {
+        if !self.game.as_ref().unwrap().message_queue.is_empty() {
             return Some(box MessageState::new(self.game.take().unwrap()))
         }
 
@@ -83,7 +83,7 @@ impl MessageState {
 impl State for MessageState {
     fn maybe_new_state(&mut self) -> Option<Box<dyn State>> { None }
     fn maybe_exit_game(&self) -> Option<Exit> { self.should_exit }
-    fn should_exit(&self) -> bool { self.game.as_ref().unwrap().level.message_queue.is_empty() }
+    fn should_exit(&self) -> bool { self.game.as_ref().unwrap().message_queue.is_empty() }
 
     fn exit(&mut self) -> Game { self.game.take().unwrap() }
 
@@ -93,27 +93,27 @@ impl State for MessageState {
         self.get_game_mut().rendering_component.before_render_new_frame();
         self.get_game_mut().render();
 
-        if !self.game.as_mut().unwrap().level.message_queue.is_empty() {
+        if !self.game.as_mut().unwrap().message_queue.is_empty() {
             let game = self.game.as_mut().unwrap();
 
-            let mut message = game.level.message_queue.drain(..).map(|s| add_punctuation(s)).collect::<Vec<String>>().join(" ");
+            let mut message = game.message_queue.drain(..).map(|s| add_punctuation(s)).collect::<Vec<String>>().join(" ");
             if message.len() > (MAP_WIDTH - 21) as usize {
                 let spaces = message.match_indices(" ").collect::<Vec<_>>();
                 let m_clone = message.clone();
                 let (first, last) = m_clone.split_at(spaces[spaces.len()/2].0);
                 message = first.to_string();
-                game.level.message_queue.insert(0, last.to_string());
+                game.message_queue.insert(0, last.to_string());
             }
             game.rendering_component.push_message(&message);
-            game.level.message_cache.push(message);
-            if !game.level.message_queue.is_empty() {
+            game.message_cache.push(message);
+            if !game.message_queue.is_empty() {
                 game.rendering_component.print(&"-- enter for more --".to_string(), MAP_WIDTH - 21, 0);
             }
         }
 
         self.get_game_mut().rendering_component.after_render_new_frame();
 
-        if !self.game.as_mut().unwrap().level.message_queue.is_empty() {
+        if !self.game.as_mut().unwrap().message_queue.is_empty() {
             let mut keypress;
             loop {
                 keypress = self.game.as_mut().unwrap().wait_for_keypress();

@@ -29,6 +29,10 @@ pub struct Game {
     pub random: IsaacRng,
     /// The game's RNG seed
     pub seed: u64,
+    /// A vector of messages to show to the player
+    pub message_queue: Vec<String>,
+    /// Where we are in the massages vector
+    pub message_cache: Vec<String>,
 }
 
 impl Game {
@@ -52,6 +56,8 @@ impl Game {
             window_bounds: bounds,
             rendering_component: rc,
             random: isaac,
+            message_queue: vec!["Welcome to MR: TOM".to_string()],
+            message_cache: vec![],
         }
     }
 
@@ -120,6 +126,6 @@ impl Game {
     }
 
     pub fn game_log(&mut self, message: String) {
-        self.level.message_queue.push(message);
+        self.message_queue.push(message);
     }
 }

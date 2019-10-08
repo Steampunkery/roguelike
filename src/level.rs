@@ -1,6 +1,5 @@
 use crate::actor::{Actor, Entity};
 use crate::item::ItemsMap;
-use crate::rendering::RenderingComponent;
 use crate::map::{DungeonMapComponent, MapComponent};
 
 use rand_isaac::IsaacRng;
@@ -17,10 +16,6 @@ pub struct Level {
     pub items: ItemsMap,
     /// The actual `MapComponent` that hold the meat of the level data
     pub map_component: Box<dyn MapComponent + 'static>,
-    /// A vector of messages to show to the player
-    pub message_queue: Vec<String>,
-    /// Where we are in the massages vector
-    pub message_cache: Vec<String>,
     /// Input handed down from the Game
     pub input: Option<Key>,
     /// The entity who can act at a given moment
@@ -61,8 +56,6 @@ impl Level {
             items,
             entities,
             map_component: mc,
-            message_queue: vec!["Welcome to MR: TOM".to_string()],
-            message_cache: vec![],
             input: None,
             current_actor: 0
         }
