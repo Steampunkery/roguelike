@@ -81,7 +81,7 @@ impl Game {
 
     /// Calls the update methods of all objects in the domain of the game. Think player, items, mobs, etc.
     pub fn update(&mut self) {
-        'outer: while self.level.current_actor < self.level.entities.len() {
+        while self.level.current_actor < self.level.entities.len() {
             let mut entity = self.level.entities[self.level.current_actor].take().unwrap();
             let mut action = entity.get_action(&mut self.level);
             self.level.entities[self.level.current_actor] = Some(entity);
@@ -90,12 +90,21 @@ impl Game {
                 'inner: loop {
                     let act = action.unwrap();
                     let result = act.perform(&mut self.level);
-                    if !result.success { return }
-                    if result.alternate.is_none() { break 'inner }
+
+                    if result.success {
+                        break 'inner
+                    } else if !result.success && result.alternate.is_none() {
+                        if self.level.entities[self.level.current_actor].as_ref().unwrap().player {
+                            return
+                        }
+                        // action failed, no alternate, and not player means fuck it, you lose your turn
+                        break 'inner
+                    }
                     action = result.alternate;
                 }
                 self.level.current_actor += 1;
             } else {
+                println!("No action");
                 return
             }
 
@@ -108,8 +117,8 @@ impl Game {
     pub fn render(&mut self) {
         self.level.map_component.render(&mut self.rendering_component, &self.level.entities[0].as_ref().unwrap());
 
-        for item in self.level.items.values() {
-            item.render(&mut self.rendering_component);
+        for items in self.level.items.values() {
+            items[0].render(&mut self.rendering_component);
         }
 
         // reverse to render the player last because it's always 0

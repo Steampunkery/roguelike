@@ -24,6 +24,34 @@ pub enum Direction {
     NoDir,
 }
 
+pub struct PickupAction {
+    pub target: usize
+}
+
+impl PickupAction {
+    pub fn new(target: usize) -> PickupAction { PickupAction { target } }
+}
+
+impl Action for PickupAction {
+    fn perform(&self, level: &mut Level) -> ActionResult {
+        let pos = level.entities[self.target].as_ref().unwrap().position;
+
+        let maybe_items = level.items.remove(&pos);
+        
+        if let Some(items) = maybe_items {
+            let inventory = &mut level.entities[self.target].as_mut().unwrap().inventory;
+            inventory.extend(items);
+            for item in inventory {
+                println!("{}", item.name);
+            }
+        } else {
+            return ActionResult { success: false, alternate: None }
+        }
+        
+        ActionResult { success: true, alternate: None }
+    }
+}
+
 pub struct WalkAction {
     pub direction: Direction,
     pub target: usize,
@@ -72,7 +100,7 @@ impl Action for WalkAction {
             return ActionResult { success: true, alternate: None }
         }
 
-        ActionResult { success: true, alternate: Some(box WaitAction { target: self.target }) }
+        ActionResult { success: true, alternate: None }
     }
 }
 

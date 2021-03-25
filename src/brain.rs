@@ -11,7 +11,7 @@ use crate::map::MapComponent;
 use tcod::colors::Color;
 use rand::Rng;
 
-use crate::action::{WalkAction, WaitAction, Action};
+use crate::action::{WalkAction, WaitAction, Action, PickupAction};
 
 /// A trait for defining a method of movement
 /// that may be applied to any living monster.
@@ -77,7 +77,7 @@ impl BrainComponent for AggroBrainComponent {
 }
 
 impl PlayerBrainComponent {
-    /// Convenience method for creating `TcodUserMovementComponents`.
+    /// Convenience method for creating `PlayerBrainComponents`.
     pub fn new() -> PlayerBrainComponent {
         PlayerBrainComponent
     }
@@ -103,6 +103,7 @@ impl BrainComponent for PlayerBrainComponent {
                     (NumPad1, _) => Some(box WalkAction::new(SW, target)),
                     (NumPad3, _) => Some(box WalkAction::new(SE, target)),
                     (Char, '.') => Some(box WaitAction { target }),
+                    (Char, 'g') => Some(box PickupAction { target }),
                     _ => None
                 }
             }

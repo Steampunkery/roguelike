@@ -10,6 +10,7 @@ pub mod level;
 pub mod item;
 pub mod action;
 pub mod state;
+pub mod ui;
 
 use game::Game;
 
@@ -80,6 +81,7 @@ fn main() {
     }
 }
 
+// Attempts to load a savegame
 fn try_load_game() -> Option<u64> {
     let user_home = home_dir()?;
     let seed = fs::read_to_string([user_home.to_str().unwrap(), ".config", "mrtom", "save.dat"].iter().collect::<PathBuf>());

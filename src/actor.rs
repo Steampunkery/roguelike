@@ -31,6 +31,7 @@ pub struct Entity {
     /// Whether the mob is aggro'd to the player
     pub is_hostile: bool,
 
+    pub player: bool,
     pub inventory: Vec<Item>,
     pub wielded: Option<usize>,
 }
@@ -64,6 +65,7 @@ impl Entity {
             brain_component: bc,
             inventory: vec![],
             wielded: None,
+            player: false,
         }
     }
 
@@ -101,6 +103,7 @@ impl Entity {
             inventory: vec![],
             wielded: None,
             brain_component: box PlayerBrainComponent::new(),
+            player: true,
         }
     }
 }

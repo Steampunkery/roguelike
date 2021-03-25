@@ -25,7 +25,7 @@ const BALL_SYM: char = '0';
 const CHAIN_SYM: char = '_';
 const VENOM_SYM: char = '.';
 
-pub type ItemsMap = HashMap<Point, Item>;
+pub type ItemsMap = HashMap<Point, Vec<Item>>;
 
 // Also shamelessly copy/pasted
 pub enum ItemType {
@@ -71,11 +71,11 @@ pub fn place_items(rooms: &Vec<Rect>, random: &mut IsaacRng) -> ItemsMap {
     let mut items = ItemsMap::new();
     let room = rooms[0];
     let rand_point = room.rand_point(random);
-    items.insert(rand_point, Item {
+    items.insert(rand_point, vec![Item {
         position: rand_point,
         item_type: ItemType::WEAPON,
         name: "Sword".to_string(),
-    });
+    }]);
 
     items
 }

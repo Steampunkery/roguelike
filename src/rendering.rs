@@ -10,7 +10,7 @@ use tcod::console::{Root, BackgroundFlag, Console};
 use crate::actor::Entity;
 
 /// The distance of the character's FOV
-const TORCH_RADIUS: i32 = 10;
+const PLAYER_FOV: i32 = 10;
 /// Whether the walls should be lit by the FOV algorithm (purely aesthetic)
 const FOV_LIGHT_WALLS: bool = true;
 /// The algorithm type for calculating FOV
@@ -92,7 +92,7 @@ impl RenderingComponent for TcodRenderingComponent {
         // Recompute the FOV before we render the map
         let player_pos = player.get_position();
         if player_pos != player.get_last_position() {
-            self.fov_map.compute_fov(player_pos.x, player_pos.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
+            self.fov_map.compute_fov(player_pos.x, player_pos.y, PLAYER_FOV, FOV_LIGHT_WALLS, FOV_ALGO);
         }
 
         for x in 0..map.len() {

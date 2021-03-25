@@ -4,6 +4,11 @@ use crate::util::add_punctuation;
 
 use tcod::input::KeyCode;
 
+pub enum PlayerState {
+    Play,
+    WaitForUI,
+}
+
 pub trait State {
     fn maybe_new_state(&mut self) -> Option<Box<dyn State>>;
     fn maybe_exit_game(&self) -> Option<Exit>;
@@ -34,6 +39,15 @@ pub struct MessageState {
     game: Option<Game>,
     should_exit: Option<Exit>,
 }
+
+pub struct ItemSelectState {
+    game: Option<Game>,
+    should_exit: Option<Exit>,
+}
+
+// For when I eventually add a splash screen
+#[allow(dead_code)]
+pub struct SplashState;
 
 impl PlayState {
     pub fn new(game: Game) -> PlayState {
